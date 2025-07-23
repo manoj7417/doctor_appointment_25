@@ -69,6 +69,11 @@ const doctorSchema = new mongoose.Schema(
             type: String,
             default: "pending",
         },
+        slug: {
+            type: String,
+            unique: true,
+            sparse: true,
+        },
     },
     { timestamps: true }
 );

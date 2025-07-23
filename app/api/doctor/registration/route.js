@@ -53,6 +53,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConfig";
 import doctorModel from "@/models/doctorModel";
 import bcrypt from "bcryptjs";
+import { generateDoctorSlug } from "@/lib/utils";
 
 export async function POST(req) {
     let body;
@@ -89,6 +90,10 @@ export async function POST(req) {
             inPersonConsultation: inPersonConsultation || false,
             status: "pending",
         });
+
+        // Generate and save slug
+        const slug = generateDoctorSlug(doctor.name, doctor._id.toString());
+        await doctorModel.findByIdAndUpdate(doctor._id, { slug });
 
         return NextResponse.json({
             message: "Doctor registered successfully",

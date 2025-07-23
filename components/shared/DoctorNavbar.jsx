@@ -82,7 +82,7 @@ export default function DoctorNavbar() {
                 className="h-8 w-8 rounded-full object-cover"
               />
             ) : (
-              <FaUserCircle className="h-8 w-8 text-gray-500" />
+            <FaUserCircle className="h-8 w-8 text-gray-500" />
             )}
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-700">

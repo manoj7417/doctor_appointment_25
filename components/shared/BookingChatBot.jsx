@@ -21,7 +21,7 @@ import { useUserStore } from "@/store/userStore";
 import useBookingStore from "@/store/bookingStore";
 import { handleBooking } from "@/lib/bookingUtils";
 
-export default function BookingChatBot() {
+export default function BookingChatBot({ doctorId }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState("greet");
   const [phone, setPhone] = useState("");
@@ -61,13 +61,27 @@ export default function BookingChatBot() {
   useEffect(() => {
     async function fetchDoctors() {
       try {
-        const res = await fetch("/api/doctor/getAll");
-        const data = await res.json();
+        if (doctorId) {
+          // If doctorId is provided, fetch specific doctor
+          const res = await fetch(`/api/doctors/${doctorId}`);
+          const data = await res.json();
 
-        if (data.success) {
-          setDoctors(data.doctors);
+          if (data.success) {
+            setDoctors([data.doctor]);
+            setSelectedDoctor(data.doctor);
+          } else {
+            setError(data.message || "Failed to load doctor");
+          }
         } else {
-          setError(data.message || "Failed to load doctors");
+          // Otherwise fetch all doctors
+          const res = await fetch("/api/doctor/getAll");
+          const data = await res.json();
+
+          if (data.success) {
+            setDoctors(data.doctors);
+          } else {
+            setError(data.message || "Failed to load doctors");
+          }
         }
       } catch (err) {
         setError(err.message || "Something went wrong");
@@ -77,7 +91,7 @@ export default function BookingChatBot() {
     }
 
     fetchDoctors();
-  }, []);
+  }, [doctorId]);
 
   useEffect(() => {
     setAnimateIn(open);
