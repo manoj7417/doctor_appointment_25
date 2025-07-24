@@ -43,6 +43,8 @@ const DoctorLogin = () => {
       console.log("Login result:", result);
 
       if (res.ok) {
+        console.log("Login successful, result:", result);
+        
         // Force clear any existing data first, then set new doctor data
         clearDoctorData();
         if (typeof window !== "undefined") {
@@ -53,16 +55,11 @@ const DoctorLogin = () => {
         // Update store with fresh doctor data
         setDoctorData(result.doctor);
         
-        const doctorStatus = result?.doctor?.status;
-        if (doctorStatus === "approved") {
-          router.push("/doctor-dashboard");
-          toast.success("Login successful!");
-        } else {
-          router.push("/doctor-profile");
-          toast.info(
-            "Please complete your profile before accessing the dashboard."
-          );
-        }
+        toast.success("Login successful! Redirecting to dashboard...");
+        
+        // Immediate redirect to dashboard - no conditions, no delays
+        console.log("Redirecting to dashboard...");
+        router.push("/doctor-dashboard");
       } else {
         toast.error(`Error: ${result.message}`);
       }

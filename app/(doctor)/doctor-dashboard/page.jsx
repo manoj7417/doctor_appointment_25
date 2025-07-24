@@ -56,7 +56,7 @@ export default function Dashboard() {
 
   // Fetch and update doctor data when dashboard loads
   useEffect(() => {
-    if (!isClient || !doctorData) return;
+    if (!isClient) return;
 
     const fetchDoctorData = async () => {
       setDoctorLoading(true);
@@ -80,20 +80,16 @@ export default function Dashboard() {
       }
     };
 
-    // Only fetch if we don't have complete doctor data
-    if (!doctorData.name || !doctorData.email) {
-      fetchDoctorData();
-    } else {
-      setDoctorLoading(false);
-    }
-  }, [setDoctorData, doctorData?.name || '', doctorData?.email || '', isClient]);
+    // Always fetch doctor data to ensure we have the latest
+    fetchDoctorData();
+  }, [setDoctorData, isClient]);
 
   useEffect(() => {
     fetchDashboardData();
   }, []);
 
   // Show loading if doctor data is not ready
-  if (doctorLoading || !isClient) {
+  if (doctorLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

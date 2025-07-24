@@ -9,6 +9,8 @@ import {
   FaChartLine,
   FaCog,
   FaSignOutAlt,
+  FaUserPlus,
+  FaCogs,
 } from "react-icons/fa";
 
 export default function DoctorSidebar() {
@@ -73,6 +75,24 @@ export default function DoctorSidebar() {
             >
               <FaCog className="mr-3 text-gray-500 group-hover:text-gray-500" />
               Settings
+            </Link>
+            
+            {/* Add Doctors Link */}
+            <Link
+              href="/doctor-dashboard/add-doctor"
+              className="flex items-center px-2 py-3 text-sm font-medium rounded-md text-gray-900 hover:bg-gray-100 group"
+            >
+              <FaUserPlus className="mr-3 text-gray-500 group-hover:text-gray-500" />
+              Add Doctors
+            </Link>
+            
+            {/* Services Link */}
+            <Link
+              href="/doctor-dashboard/services"
+              className="flex items-center px-2 py-3 text-sm font-medium rounded-md text-gray-900 hover:bg-gray-100 group"
+            >
+              <FaCogs className="mr-3 text-gray-500 group-hover:text-gray-500" />
+              Services
             </Link>
           </div>
           <div className="px-4 py-4">

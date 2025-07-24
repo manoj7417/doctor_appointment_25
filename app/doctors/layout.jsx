@@ -1,7 +1,7 @@
 import Footer from "@/components/shared/Footer";
 import Navbar from "@/components/shared/Navbar";
 
-const DoctorsLayout = ({ children }) => {
+const Layout = ({ children }) => {
   return (
     <>
       <main>
@@ -13,4 +13,4 @@ const DoctorsLayout = ({ children }) => {
   );
 };
 
-export default DoctorsLayout; 
+export default Layout; 

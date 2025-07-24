@@ -1,9 +1,11 @@
 "use client";
 import useBookingStore from "@/store/bookingStore";
+import { useDoctorStore } from "@/store/doctorStore";
 import React, { useEffect, useState } from "react";
 
 export default function AppointmentPage() {
   const { bookingDetails, setBookingDetails } = useBookingStore();
+  const { _id: doctorId, name: doctorName } = useDoctorStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -12,6 +14,13 @@ export default function AppointmentPage() {
       try {
         setLoading(true);
         setError(null);
+
+        // Check if doctor is logged in
+        if (!doctorId) {
+          setError("Please log in as a doctor to view appointments");
+          setLoading(false);
+          return;
+        }
 
         const res = await fetch("/api/chatbot/booking");
 
@@ -25,12 +34,15 @@ export default function AppointmentPage() {
           throw new Error(data?.message || "Failed to fetch bookings");
         }
 
-        const bookingsWithCheckStatus = Array.isArray(data.bookings)
-          ? data.bookings.map((booking) => ({
-              ...booking,
-              checked: !!booking.checked,
-            }))
+        // Filter bookings by current doctor
+        const doctorBookings = Array.isArray(data.bookings)
+          ? data.bookings.filter((booking) => booking.doctorId === doctorId)
           : [];
+
+        const bookingsWithCheckStatus = doctorBookings.map((booking) => ({
+          ...booking,
+          checked: !!booking.checked,
+        }));
 
         setBookingDetails(bookingsWithCheckStatus);
       } catch (error) {
@@ -42,7 +54,7 @@ export default function AppointmentPage() {
     };
 
     fetchBookings();
-  }, [setBookingDetails]);
+  }, [setBookingDetails, doctorId]);
 
   const toggleChecked = async (bookingId) => {
     try {
@@ -98,7 +110,7 @@ export default function AppointmentPage() {
         <div className="mb-6">
           <h2 className="text-2xl font-semibold mb-2">Appointments</h2>
           <p className="text-sm text-gray-600">
-            Check patients to mark them as seen. Checked patients will appear in your Patients page.
+            {doctorName ? `Showing appointments for Dr. ${doctorName}` : "Loading doctor information..."}
           </p>
         </div>
         <div className="flex justify-center items-center h-64">
@@ -114,7 +126,7 @@ export default function AppointmentPage() {
         <div className="mb-6">
           <h2 className="text-2xl font-semibold mb-2">Appointments</h2>
           <p className="text-sm text-gray-600">
-            Check patients to mark them as seen. Checked patients will appear in your Patients page.
+            {doctorName ? `Showing appointments for Dr. ${doctorName}` : "Please log in as a doctor"}
           </p>
         </div>
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
@@ -130,6 +142,9 @@ export default function AppointmentPage() {
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-2">Appointments</h2>
         <p className="text-sm text-gray-600">
+          {doctorName ? `Showing appointments for Dr. ${doctorName}` : "Please log in as a doctor"}
+        </p>
+        <p className="text-sm text-gray-500 mt-1">
           Check patients to mark them as seen. Checked patients will appear in your Patients page.
         </p>
       </div>
@@ -222,7 +237,7 @@ export default function AppointmentPage() {
             ) : (
               <tr>
                 <td colSpan="8" className="py-4 text-center text-gray-500">
-                  No appointments found
+                  {doctorName ? "No appointments found for this doctor" : "Please log in as a doctor to view appointments"}
                 </td>
               </tr>
             )}

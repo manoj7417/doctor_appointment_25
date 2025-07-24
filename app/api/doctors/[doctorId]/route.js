@@ -5,7 +5,7 @@ import { connectDB } from "@/lib/dbConfig";
 export async function GET(request, { params }) {
     try {
         await connectDB();
-        const { doctorId } = params;
+        const { doctorId } = await params;
 
         if (!doctorId) {
             return NextResponse.json(

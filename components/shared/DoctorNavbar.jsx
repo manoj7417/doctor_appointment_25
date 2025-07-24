@@ -38,11 +38,9 @@ export default function DoctorNavbar() {
       }
     };
 
-    // Only fetch if we don't have complete doctor data
-    if (!name || !email) {
-      fetchDoctorData();
-    }
-  }, [setDoctorData, name, email, isClient]);
+    // Always fetch doctor data to ensure we have the latest
+    fetchDoctorData();
+  }, [setDoctorData, isClient]);
 
   return (
     <div className="bg-white shadow-sm">
@@ -75,7 +73,7 @@ export default function DoctorNavbar() {
 
           {/* Profile Info */}
           <div className="flex items-center">
-            {isClient && image ? (
+            {image ? (
               <img 
                 src={image} 
                 alt="Profile" 
@@ -86,10 +84,10 @@ export default function DoctorNavbar() {
             )}
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-700">
-                {isClient && name ? name : "Doctor Name"}
+                {name || "Doctor Name"}
               </p>
               <p className="text-xs font-medium text-gray-500">
-                {isClient && specialization ? specialization : "Specialist"}
+                {specialization || "Specialist"}
               </p>
             </div>
           </div>

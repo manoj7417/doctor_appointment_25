@@ -74,13 +74,13 @@ export default function BookingChatBot({ doctorId }) {
           }
         } else {
           // Otherwise fetch all doctors
-          const res = await fetch("/api/doctor/getAll");
-          const data = await res.json();
+        const res = await fetch("/api/doctor/getAll");
+        const data = await res.json();
 
-          if (data.success) {
-            setDoctors(data.doctors);
-          } else {
-            setError(data.message || "Failed to load doctors");
+        if (data.success) {
+          setDoctors(data.doctors);
+        } else {
+          setError(data.message || "Failed to load doctors");
           }
         }
       } catch (err) {
@@ -696,7 +696,7 @@ export default function BookingChatBot({ doctorId }) {
                   <div className="space-y-4">
                     {doctors.map((doc) => (
                       <div
-                        key={doc.id}
+                        key={doc._id}
                         className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
                         onClick={() => selectDoctor(doc)}
                       >
@@ -805,7 +805,7 @@ export default function BookingChatBot({ doctorId }) {
                           <div className="mt-1 flex flex-wrap gap-2">
                             {selectedDoctor.services.map((service, index) => (
                               <span
-                                key={index}
+                                key={`service-${service}-${index}`}
                                 className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded"
                               >
                                 {service}
@@ -876,7 +876,7 @@ export default function BookingChatBot({ doctorId }) {
                               {slot}
                             </button>
                           ))} */}
-                          {Object.entries(selectedDoctor.slots).map(
+                          {selectedDoctor.slots && Object.entries(selectedDoctor.slots).map(
                             ([day, times]) => (
                               <div key={day} className="mb-4">
                                 <h4 className="font-semibold text-sm text-gray-700 mb-2">

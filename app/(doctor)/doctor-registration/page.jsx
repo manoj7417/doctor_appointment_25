@@ -124,21 +124,12 @@ const DoctorRegistration = () => {
         }
         
         setBasicInfo(result.doctor);
-        toast.success("Registration successful!");
+        toast.success("Registration successful! Please login to continue.");
         
-        // Redirect based on doctor status
-        const doctorStatus = result.doctor?.status;
-        if (doctorStatus === "approved") {
-          toast.success("Welcome to your dashboard!");
-          setTimeout(() => {
-            router.push("/doctor-dashboard");
-          }, 1000);
-        } else {
-          toast.info("Registration successful! Please complete your profile to start accepting appointments.");
-          setTimeout(() => {
-            router.push("/doctor-profile");
-          }, 1500);
-        }
+        // Always redirect to login page after registration
+        setTimeout(() => {
+          router.push("/doctor-login");
+        }, 1500);
       } else {
         toast.error(`Error: ${result.message}`);
       }
@@ -226,7 +217,7 @@ const DoctorRegistration = () => {
         <div className="lg:w-3/5 p-8 md:p-12">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-800">
-              Doctor Registration
+              Clinic Registration
             </h2>
             <p className="text-gray-600 mt-2">
               Create your account to get started

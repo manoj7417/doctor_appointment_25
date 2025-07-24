@@ -2,88 +2,87 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConfig";
 import doctorModel from "@/models/doctorModel";
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
+import { generateDoctorSlug } from "@/lib/utils";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-export async function PUT(req) {
+export async function PUT(request) {
     try {
-        const body = await req.json();
+        const body = await request.json();
         const {
+            name,
+            email,
+            phone,
+            address,
             specialization,
             experience,
             degree,
             hospital,
-            about,
             price,
+            about,
             services,
             availability,
             slots,
             hasWebsite,
             websiteUrl,
             virtualConsultation,
-            inPersonConsultation
+            inPersonConsultation,
+            image,
         } = body;
 
         await connectDB();
 
-        const cookieStore = await cookies();
-        const token = cookieStore.get("doctorToken")?.value;
+        // Find the doctor by email (assuming email is unique)
+        const doctor = await doctorModel.findOne({ email });
 
-        if (!token) {
-            return NextResponse.json({ message: "Unauthorized: No token" }, { status: 401 });
+        if (!doctor) {
+            return NextResponse.json(
+                { success: false, message: "Doctor not found" },
+                { status: 404 }
+            );
         }
 
-        // Verify token
-        let decoded;
-        try {
-            decoded = jwt.verify(token, JWT_SECRET);
-        } catch (err) {
-            return NextResponse.json({ message: "Unauthorized: Invalid token" }, { status: 401 });
-        }
-
-        const doctorId = decoded?.doctorId;
-
-        // Prepare the update object
+        // Update the doctor profile
         const updateData = {
-            specialization,
-            experience,
-            degree,
-            hospital,
-            about,
-            price,
-            services,
-            availability,
-            slots,
-            status: "approved",
-            // Handle website information
-            hasWebsite: hasWebsite === true || hasWebsite === "yes",
-            websiteUrl: hasWebsite === true || hasWebsite === "yes" ? websiteUrl : null,
-            // Handle consultation types
-            virtualConsultation: virtualConsultation || false,
-            inPersonConsultation: inPersonConsultation || false
+            name: name || doctor.name,
+            email: email || doctor.email,
+            phone: phone || doctor.phone,
+            address: address || doctor.address,
+            specialization: specialization || doctor.specialization,
+            experience: experience || doctor.experience,
+            degree: degree || doctor.degree,
+            hospital: hospital || doctor.hospital,
+            price: price || doctor.price,
+            about: about || doctor.about,
+            services: services || doctor.services,
+            availability: availability || doctor.availability,
+            slots: slots || doctor.slots,
+            hasWebsite: hasWebsite !== undefined ? hasWebsite : doctor.hasWebsite,
+            websiteUrl: hasWebsite ? websiteUrl : doctor.websiteUrl,
+            virtualConsultation: virtualConsultation !== undefined ? virtualConsultation : doctor.virtualConsultation,
+            inPersonConsultation: inPersonConsultation !== undefined ? inPersonConsultation : doctor.inPersonConsultation,
+            image: image || doctor.image,
+            status: "approved", // Mark as approved when profile is complete
         };
 
-        const updatedDoctor = await doctorModel.findByIdAndUpdate(
-            doctorId,
-            updateData,
-            { new: true }
-        );
-
-        if (!updatedDoctor) {
-            return NextResponse.json({ message: "Doctor not found" }, { status: 404 });
+        // Generate slug if name changed
+        if (name && name !== doctor.name) {
+            updateData.slug = generateDoctorSlug(name, doctor._id.toString());
         }
 
-        return NextResponse.json({
-            message: "Profile updated successfully",
-            doctor: updatedDoctor
-        });
+        const updatedDoctor = await doctorModel.findByIdAndUpdate(
+            doctor._id,
+            updateData,
+            { new: true, runValidators: true }
+        );
 
+        return NextResponse.json({
+            success: true,
+            message: "Profile updated successfully",
+            doctor: updatedDoctor,
+        });
     } catch (error) {
-        console.error("Profile update error:", error);
+        console.error("Error updating doctor profile:", error);
         return NextResponse.json(
-            { message: "Server error", error: error.message },
+            { success: false, message: "Failed to update profile" },
             { status: 500 }
         );
     }

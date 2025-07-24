@@ -1,54 +1,3 @@
-// import { NextResponse } from "next/server";
-// import { connectDB } from "@/lib/dbConfig";
-// import doctorModel from "@/models/doctorModel";
-// import bcrypt from "bcryptjs";
-
-// export async function POST(req) {
-//     try {
-//         const body = await req.json();
-//         const { firstName, lastName, email, phone, address, password } = body;
-
-//         if (!firstName || !lastName || !email || !phone || !address || !password) {
-//             return NextResponse.json({ message: "All fields are required" }, { status: 400 });
-//         }
-
-//         await connectDB();
-
-//         // Check if doctor already exists
-//         const existingDoctor = await doctorModel.findOne({ email });
-//         if (existingDoctor) {
-//             return NextResponse.json({ message: "Doctor already exists" }, { status: 400 });
-//         }
-
-//         // Hash the password
-//         const hashedPassword = await bcrypt.hash(password, 10);
-
-//         // Create Doctor Profile
-//         const doctor = await doctorModel.create({
-//             firstName,
-//             lastName,
-//             email,
-//             phone,
-//             address,
-//             password: hashedPassword,
-//             status: "pending",
-//         });
-
-
-//         return NextResponse.json({ message: "Doctor registered successfully", doctor }, { status: 201 });
-//     } catch (error) {
-//         console.error("Doctor registration error:", error);
-//         return NextResponse.json({ message: "Server error" }, { status: 500 });
-//     }
-// }
-
-
-
-
-
-//Second approach
-
-
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConfig";
 import doctorModel from "@/models/doctorModel";
@@ -63,7 +12,27 @@ export async function POST(req) {
         return NextResponse.json({ message: "Invalid JSON format" }, { status: 400 });
     }
 
-    const { name, email, phone, address, password, image, virtualConsultation, inPersonConsultation } = body;
+    const {
+        name,
+        email,
+        phone,
+        address,
+        password,
+        image,
+        specialization,
+        experience,
+        degree,
+        hospital,
+        about,
+        price,
+        services,
+        availability,
+        slots,
+        hasWebsite,
+        websiteUrl,
+        virtualConsultation,
+        inPersonConsultation
+    } = body;
 
     if (!name || !email || !phone || !address || !password) {
         return NextResponse.json({ message: "All fields are required" }, { status: 400 });
@@ -86,6 +55,17 @@ export async function POST(req) {
             address,
             password: hashedPassword,
             image,
+            specialization,
+            experience,
+            degree,
+            hospital,
+            about,
+            price,
+            services,
+            availability,
+            slots,
+            hasWebsite: hasWebsite || false,
+            websiteUrl: hasWebsite ? websiteUrl : null,
             virtualConsultation: virtualConsultation || false,
             inPersonConsultation: inPersonConsultation || false,
             status: "pending",
@@ -104,6 +84,15 @@ export async function POST(req) {
                 phone: doctor.phone,
                 address: doctor.address,
                 image: doctor.image,
+                specialization: doctor.specialization,
+                experience: doctor.experience,
+                degree: doctor.degree,
+                hospital: doctor.hospital,
+                about: doctor.about,
+                price: doctor.price,
+                services: doctor.services,
+                availability: doctor.availability,
+                slots: doctor.slots,
                 status: doctor.status,
                 virtualConsultation: doctor.virtualConsultation,
                 inPersonConsultation: doctor.inPersonConsultation,

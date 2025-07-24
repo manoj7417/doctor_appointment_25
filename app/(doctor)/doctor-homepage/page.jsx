@@ -24,12 +24,33 @@ const DoctorHomePage = () => {
         const res = await fetch("/api/doctor/getAll");
         const data = await res.json();
 
+        console.log("API response:", data);
+        console.log("Total doctors found:", data.totalCount);
+
         if (data.success) {
+          console.log("Doctors fetched with complete details:", data.doctors.map(d => ({ 
+            name: d.name, 
+            status: d.status, 
+            id: d._id,
+            specialization: d.specialization,
+            experience: d.experience,
+            hospital: d.hospital,
+            price: d.price,
+            availability: d.availability,
+            services: d.services,
+            about: d.about,
+            image: d.image,
+            slots: d.slots,
+            degree: d.degree,
+            virtualConsultation: d.virtualConsultation,
+            inPersonConsultation: d.inPersonConsultation
+          })));
           setDoctors(data.doctors);
         } else {
           setError(data.message || "Failed to load doctors");
         }
       } catch (err) {
+        console.error("Error fetching doctors:", err);
         setError(err.message || "Something went wrong");
       } finally {
         setLoading(false);
@@ -83,25 +104,21 @@ const DoctorHomePage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {doctors.map((doctor) => {
-            const {
-              _id,
-              name,
-              image,
-              specialization,
-              experience,
-              price,
-              availability,
-              hospital,
-              degree,
-              about,
-              services,
-              status,
-            } = doctor;
+        {doctors.map((doctor) => {
+          const {
+            _id,
+            name,
+            image,
+            specialization,
+            experience,
+            hospital,
+            degree,
+            status,
+          } = doctor;
 
-            return (
-              <div
-                key={_id}
+          return (
+            <div
+              key={_id}
                 className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer transform hover:scale-105 transition-transform duration-300"
                 onClick={() => handleDoctorClick(doctor)}
               >
@@ -111,35 +128,30 @@ const DoctorHomePage = () => {
                     src={image || "/default-doctor.png"}
                     alt={name}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = "/default-doctor.png";
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
                   <div className="absolute bottom-4 left-4 text-white">
-                    <h3 className="text-xl font-bold">{name}</h3>
-                    <p className="text-blue-100">{specialization}</p>
-                  </div>
+                    <h3 className="text-xl font-bold">{name || "Doctor Name"}</h3>
+                    <p className="text-blue-100">{specialization || "General Medicine"}</p>
+                        </div>
                   <div className="absolute top-4 right-4 flex items-center bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
                     <FaStar className="text-yellow-300 mr-1" />
                     <span className="text-white font-semibold">4.8</span>
-                  </div>
-                </div>
+                      </div>
+                    </div>
 
-                {/* Doctor Info */}
+                {/* Doctor Info - Limited Details */}
                 <div className="p-6">
-                  <div className="space-y-4">
-                    {/* Quick Stats */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center">
-                        <FaGraduationCap className="text-blue-500 mr-2" />
-                        <span className="text-sm text-gray-600">
-                          {degree || "MD"}
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <MdHealthAndSafety className="text-blue-500 mr-2" />
-                        <span className="text-sm text-gray-600">
-                          {experience || 0} years
-                        </span>
-                      </div>
+                  <div className="space-y-3">
+                    {/* Experience */}
+                    <div className="flex items-center">
+                      <MdHealthAndSafety className="text-blue-500 mr-2" />
+                      <span className="text-sm text-gray-600">
+                        {experience || 0} years experience
+                      </span>
                     </div>
 
                     {/* Hospital */}
@@ -150,53 +162,27 @@ const DoctorHomePage = () => {
                       </span>
                     </div>
 
-                    {/* Availability */}
+                    {/* Degree */}
                     <div className="flex items-center">
-                      <FaRegClock className="text-blue-500 mr-2" />
+                      <FaGraduationCap className="text-blue-500 mr-2" />
                       <span className="text-sm text-gray-600">
-                        {availability?.join(", ") || "Contact for availability"}
-                      </span>
-                    </div>
-
-                    {/* Price */}
-                    <div className="flex items-center">
-                      <FaBriefcaseMedical className="text-blue-500 mr-2" />
-                      <span className="text-sm text-gray-600">
-                        ₹{price || "Contact for pricing"}
+                        {degree || "MD"}
                       </span>
                     </div>
                   </div>
 
-                  {/* About Preview */}
-                  {about && (
-                    <div className="mt-4">
-                      <p className="text-sm text-gray-600 line-clamp-3">
-                        {about}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Services Preview */}
-                  {services && services.length > 0 && (
-                    <div className="mt-4">
-                      <p className="text-xs text-gray-500 mb-2">Services:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {services.slice(0, 3).map((service, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-                          >
-                            {service}
-                          </span>
-                        ))}
-                        {services.length > 3 && (
-                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                            +{services.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  {/* Status Badge */}
+                  <div className="mt-4">
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      status === "approved" 
+                        ? "bg-green-100 text-green-800" 
+                        : status === "pending" 
+                          ? "bg-yellow-100 text-yellow-800" 
+                          : "bg-gray-100 text-gray-800"
+                    }`}>
+                      {status}
+                    </span>
+                  </div>
 
                   {/* View Profile Button */}
                   <button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
@@ -217,10 +203,10 @@ const DoctorHomePage = () => {
             <p className="text-gray-600">
               We're currently setting up our network of healthcare professionals.
             </p>
-          </div>
-        )}
-      </div>
-    </div>
+                  </div>
+                )}
+              </div>
+            </div>
   );
 };
 
