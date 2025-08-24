@@ -31,10 +31,11 @@ export default function BookingChatBot({ doctorId }) {
   const [message, setMessage] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [isLoading, setIsLoading] = useState(false);
   const [animateIn, setAnimateIn] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [razorpayOrder, setRazorpayOrder] = useState(null);
+
   const { user, clearUser } = useUserStore();
   const { setBookingDetails } = useBookingStore();
   // const doctor = useDoctorStore((state) => state);
@@ -74,13 +75,13 @@ export default function BookingChatBot({ doctorId }) {
           }
         } else {
           // Otherwise fetch all doctors
-        const res = await fetch("/api/doctor/getAll");
-        const data = await res.json();
+          const res = await fetch("/api/doctor/getAll");
+          const data = await res.json();
 
-        if (data.success) {
-          setDoctors(data.doctors);
-        } else {
-          setError(data.message || "Failed to load doctors");
+          if (data.success) {
+            setDoctors(data.doctors);
+          } else {
+            setError(data.message || "Failed to load doctors");
           }
         }
       } catch (err) {
@@ -144,20 +145,27 @@ export default function BookingChatBot({ doctorId }) {
 
     setIsLoading(true);
     try {
+      // Add country code to phone number for BulkSMS
+      const phoneWithCountryCode = `+91${phone}`;
+
       const response = await fetch("/api/chatbot/send-otp", {
         method: "POST",
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone: phoneWithCountryCode }),
         headers: { "Content-Type": "application/json" },
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         setStep("verifyOtp");
         if (result.demoMode) {
-          toast.success("OTP sent successfully! (Demo Mode - Check console for code)");
-          console.log('DEMO MODE: Your OTP code is:', result.otpCode);
-          setMessage("Demo Mode: Check browser console for OTP code. Any 6-digit code will work for verification.");
+          toast.success(
+            "OTP sent successfully! (Demo Mode - Check console for code)"
+          );
+          console.log("DEMO MODE: Your OTP code is:", result.otpCode);
+          setMessage(
+            "Demo Mode: Check browser console for OTP code. Any 6-digit code will work for verification."
+          );
         } else {
           toast.success("OTP sent successfully!");
           setMessage("Please check your phone for the OTP.");
@@ -180,9 +188,12 @@ export default function BookingChatBot({ doctorId }) {
 
     setIsLoading(true);
     try {
+      // Send phone with country code for verification
+      const phoneWithCountryCode = `+91${phone}`;
+
       const res = await fetch("/api/chatbot/verify-otp", {
         method: "POST",
-        body: JSON.stringify({ phone, code: otp }),
+        body: JSON.stringify({ phone: phoneWithCountryCode, code: otp }),
         headers: { "Content-Type": "application/json" },
       });
       const data = await res.json();
@@ -222,10 +233,38 @@ export default function BookingChatBot({ doctorId }) {
     setShowDoctorDetails(true);
   };
 
-  const bookAppointment = (doctor, slot) => {
-    setSelectedDoctor(doctor);
-    setSelectedSlot(slot);
-    setStep("payment");
+  const bookAppointment = async (doctor, slot) => {
+    setIsLoading(true);
+    try {
+      // Check slot availability before proceeding
+      const availabilityResponse = await fetch(
+        `/api/bookings/availability?doctorId=${
+          doctor._id
+        }&date=${new Date().toISOString()}&slot=${slot}`
+      );
+      const availabilityData = await availabilityResponse.json();
+
+      if (!availabilityData.success) {
+        toast.error("Error checking slot availability");
+        return;
+      }
+
+      if (!availabilityData.available) {
+        toast.error(
+          "Selected slot is not available. Please choose another slot."
+        );
+        return;
+      }
+
+      setSelectedDoctor(doctor);
+      setSelectedSlot(slot);
+      setStep("payment");
+    } catch (error) {
+      console.error("Error checking availability:", error);
+      toast.error("Error checking slot availability. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Create Razorpay order
@@ -336,6 +375,32 @@ export default function BookingChatBot({ doctorId }) {
     }
   };
 
+  // Send booking confirmation SMS
+  const sendBookingConfirmationSMS = async (bookingDetails) => {
+    try {
+      const response = await fetch("/api/chatbot/send-booking-sms", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookingDetails),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log("Booking confirmation SMS sent successfully:", data);
+        return data;
+      } else {
+        console.error("Failed to send booking confirmation SMS:", data.message);
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      console.error("Error sending booking confirmation SMS:", error);
+      return { success: false, message: "Failed to send SMS" };
+    }
+  };
+
   // Save booking details using the enhanced handleBooking function
   const saveBookingDetails = async (paymentId) => {
     try {
@@ -351,7 +416,9 @@ export default function BookingChatBot({ doctorId }) {
       // Validate required data
       if (!selectedDoctor?._id) {
         console.error("Doctor data:", selectedDoctor);
-        throw new Error("Doctor ID is missing. Please try selecting the doctor again.");
+        throw new Error(
+          "Doctor ID is missing. Please try selecting the doctor again."
+        );
       }
 
       if (!patientName) {
@@ -390,7 +457,7 @@ export default function BookingChatBot({ doctorId }) {
       const booking = await handleBooking(
         bookingData,
         user, // Pass user if authenticated
-        (booking) => {
+        async (booking) => {
           // Success callback
           const bookingToStore = {
             id: booking._id || paymentId,
@@ -407,11 +474,31 @@ export default function BookingChatBot({ doctorId }) {
           };
 
           addBooking(bookingToStore);
-          console.log('Booking saved successfully:', booking);
-          
-          // Show success message with SMS confirmation
-          toast.success(`Booking confirmed! SMS sent to ${phone}. Check your phone for appointment details.`);
-          
+          console.log("Booking saved successfully:", booking);
+
+          // Send booking confirmation SMS
+          const smsDetails = {
+            phone,
+            patientName,
+            doctorName: selectedDoctor.name,
+            appointmentDate,
+            slot: selectedSlot,
+            bookingId: booking._id || paymentId,
+            hospital: selectedDoctor.hospital,
+          };
+
+          const smsResult = await sendBookingConfirmationSMS(smsDetails);
+
+          if (smsResult.success) {
+            toast.success(
+              `Booking confirmed! SMS sent to ${phone}. Check your phone for appointment details.`
+            );
+          } else {
+            toast.success(
+              `Booking confirmed! SMS delivery: ${smsResult.message}`
+            );
+          }
+
           // Reset form and close chatbot
           setTimeout(() => {
             setOpen(false);
@@ -427,7 +514,7 @@ export default function BookingChatBot({ doctorId }) {
         },
         (error) => {
           // Error callback
-          console.error('Booking failed:', error);
+          console.error("Booking failed:", error);
           const { addBooking } = useBookingStore.getState();
 
           addBooking({
@@ -519,12 +606,14 @@ export default function BookingChatBot({ doctorId }) {
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-4 text-white">
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-semibold">Medical Assistant</h2>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="text-white hover:text-red-200 transition"
-                >
-                  <XCircle size={20} />
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="text-white hover:text-red-200 transition"
+                  >
+                    <XCircle size={20} />
+                  </button>
+                </div>
               </div>
               <p className="text-sm text-blue-100 mt-1">
                 Book appointments with top doctors
@@ -599,6 +688,8 @@ export default function BookingChatBot({ doctorId }) {
                         </>
                       )}
                     </button>
+
+                    {/* BulkSMS Test Buttons - Only show in development */}
                   </div>
                 </div>
               )}
@@ -823,12 +914,22 @@ export default function BookingChatBot({ doctorId }) {
 
                         {/* Consultation Types */}
                         <div className="mt-4">
-                          <h4 className="font-medium text-gray-800">Consultation Types</h4>
+                          <h4 className="font-medium text-gray-800">
+                            Consultation Types
+                          </h4>
                           <div className="flex flex-wrap gap-2 mt-2">
-                            {selectedDoctor.virtualConsultation && selectedDoctor.inPersonConsultation ? (
+                            {selectedDoctor.virtualConsultation &&
+                            selectedDoctor.inPersonConsultation ? (
                               // Both consultation types available
-                              <span key="both-available" className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <span
+                                key="both-available"
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                              >
+                                <svg
+                                  className="w-3 h-3 mr-1"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
                                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Both Available
@@ -837,17 +938,35 @@ export default function BookingChatBot({ doctorId }) {
                               // Individual consultation types
                               <>
                                 {selectedDoctor.virtualConsultation && (
-                                  <span key="virtual-consultation" className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <span
+                                    key="virtual-consultation"
+                                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                                  >
+                                    <svg
+                                      className="w-3 h-3 mr-1"
+                                      fill="currentColor"
+                                      viewBox="0 0 20 20"
+                                    >
                                       <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                                     </svg>
                                     Virtual
                                   </span>
                                 )}
                                 {selectedDoctor.inPersonConsultation && (
-                                  <span key="in-person-consultation" className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                  <span
+                                    key="in-person-consultation"
+                                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                  >
+                                    <svg
+                                      className="w-3 h-3 mr-1"
+                                      fill="currentColor"
+                                      viewBox="0 0 20 20"
+                                    >
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                        clipRule="evenodd"
+                                      />
                                     </svg>
                                     In-Person
                                   </span>
@@ -876,33 +995,34 @@ export default function BookingChatBot({ doctorId }) {
                               {slot}
                             </button>
                           ))} */}
-                          {selectedDoctor.slots && Object.entries(selectedDoctor.slots).map(
-                            ([day, times]) => (
-                              <div key={day} className="mb-4">
-                                <h4 className="font-semibold text-sm text-gray-700 mb-2">
-                                  {day}
-                                </h4>
-                                <div className="flex flex-wrap gap-2">
-                                  {times.map((slot) => (
-                                    <button
-                                      key={`${day}-${slot}`}
-                                      onClick={() =>
-                                        bookAppointment(
-                                          selectedDoctor,
-                                          slot,
-                                          day
-                                        )
-                                      }
-                                      className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded text-sm flex items-center justify-center"
-                                    >
-                                      <Clock size={14} className="mr-1" />
-                                      {slot}
-                                    </button>
-                                  ))}
+                          {selectedDoctor.slots &&
+                            Object.entries(selectedDoctor.slots).map(
+                              ([day, times]) => (
+                                <div key={day} className="mb-4">
+                                  <h4 className="font-semibold text-sm text-gray-700 mb-2">
+                                    {day}
+                                  </h4>
+                                  <div className="flex flex-wrap gap-2">
+                                    {times.map((slot) => (
+                                      <button
+                                        key={`${day}-${slot}`}
+                                        onClick={() =>
+                                          bookAppointment(
+                                            selectedDoctor,
+                                            slot,
+                                            day
+                                          )
+                                        }
+                                        className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded text-sm flex items-center justify-center"
+                                      >
+                                        <Clock size={14} className="mr-1" />
+                                        {slot}
+                                      </button>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )
-                          )}
+                              )
+                            )}
                         </div>
                       </div>
                     </div>

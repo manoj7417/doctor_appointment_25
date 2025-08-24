@@ -185,7 +185,7 @@ const DoctorHomePage = () => {
                   </div>
 
                   {/* View Profile Button */}
-                  <button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                  <button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center cursor-pointer">
                     <span>View Profile</span>
                     <FaArrowRight className="ml-2" />
                   </button>

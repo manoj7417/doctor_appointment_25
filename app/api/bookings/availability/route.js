@@ -18,28 +18,50 @@ export async function GET(req) {
             );
         }
 
-        // Parse the date
+        // Parse the date correctly
         const appointmentDate = new Date(date);
-        const startOfDay = new Date(appointmentDate.setHours(0, 0, 0, 0));
-        const endOfDay = new Date(appointmentDate.setHours(23, 59, 59, 999));
+        const startOfDay = new Date(appointmentDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        
+        const endOfDay = new Date(appointmentDate);
+        endOfDay.setHours(23, 59, 59, 999);
 
-        // Check if slot is available
-        const existingBooking = await bookingModel.findOne({
+        // Build query based on whether slot is provided
+        let query = {
             doctorId,
             appointmentDate: {
                 $gte: startOfDay,
                 $lte: endOfDay
             },
-            slot: slot || { $exists: true }, // If slot is provided, check specific slot
             status: { $in: ['confirmed', 'pending'] }
-        });
+        };
+
+        // If specific slot is provided, check for that slot
+        if (slot) {
+            query.slot = slot;
+        }
+
+        // Check if slot is available
+        const existingBooking = await bookingModel.findOne(query);
 
         const available = !existingBooking;
 
         return NextResponse.json({
             success: true,
             available,
-            message: available ? 'Slot is available' : 'Slot is not available'
+            message: available ? 'Slot is available' : 'Slot is not available',
+            debug: {
+                doctorId,
+                date: appointmentDate.toISOString(),
+                slot,
+                startOfDay: startOfDay.toISOString(),
+                endOfDay: endOfDay.toISOString(),
+                existingBooking: existingBooking ? {
+                    id: existingBooking._id,
+                    slot: existingBooking.slot,
+                    status: existingBooking.status
+                } : null
+            }
         });
 
     } catch (error) {

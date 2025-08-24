@@ -57,12 +57,10 @@ const DoctorRegistration = () => {
     }
   };
 
-
-
   const handleFileChange = async (e) => {
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
-      
+
       // Show preview immediately
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -74,7 +72,7 @@ const DoctorRegistration = () => {
       setUploading(true);
       try {
         const authParams = await authenticator();
-        
+
         const result = await upload({
           file,
           fileName: `doctor-${Date.now()}-${file.name}`,
@@ -98,7 +96,7 @@ const DoctorRegistration = () => {
       toast.error("Please upload a profile image");
       return;
     }
-    
+
     if (!data.virtualConsultation && !data.inPersonConsultation) {
       toast.error("Please select at least one consultation type");
       return;
@@ -122,10 +120,10 @@ const DoctorRegistration = () => {
           localStorage.removeItem("doctor-storage");
           sessionStorage.removeItem("doctor-storage");
         }
-        
+
         setBasicInfo(result.doctor);
         toast.success("Registration successful! Please login to continue.");
-        
+
         // Always redirect to login page after registration
         setTimeout(() => {
           router.push("/doctor-login");
@@ -242,8 +240,8 @@ const DoctorRegistration = () => {
                 <label
                   htmlFor="profile-image"
                   className={`absolute bottom-0 right-0 rounded-full p-2 cursor-pointer shadow-md transition-colors ${
-                    uploading 
-                      ? "bg-gray-400 cursor-not-allowed" 
+                    uploading
+                      ? "bg-gray-400 cursor-not-allowed"
                       : "bg-indigo-600 hover:bg-indigo-700"
                   }`}
                 >
@@ -268,7 +266,7 @@ const DoctorRegistration = () => {
                   disabled={uploading}
                 />
               </div>
-              
+
               {/* Upload Status */}
               <div className="text-center">
                 {uploading && (
@@ -287,7 +285,7 @@ const DoctorRegistration = () => {
                   </p>
                 )}
               </div>
-              
+
               {errors.image && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.image.message}
@@ -425,7 +423,10 @@ const DoctorRegistration = () => {
                     {...register("virtualConsultation")}
                     className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="virtual-consultation" className="ml-2 text-sm text-gray-700">
+                  <label
+                    htmlFor="virtual-consultation"
+                    className="ml-2 text-sm text-gray-700"
+                  >
                     Virtual Consultation (Video/Phone)
                   </label>
                 </div>
@@ -436,16 +437,20 @@ const DoctorRegistration = () => {
                     {...register("inPersonConsultation")}
                     className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="in-person-consultation" className="ml-2 text-sm text-gray-700">
+                  <label
+                    htmlFor="in-person-consultation"
+                    className="ml-2 text-sm text-gray-700"
+                  >
                     In-Person Consultation
                   </label>
                 </div>
               </div>
-              {(!watch("virtualConsultation") && !watch("inPersonConsultation")) && (
-                <p className="text-red-500 text-xs mt-1">
-                  Please select at least one consultation type
-                </p>
-              )}
+              {!watch("virtualConsultation") &&
+                !watch("inPersonConsultation") && (
+                  <p className="text-red-500 text-xs mt-1">
+                    Please select at least one consultation type
+                  </p>
+                )}
             </div>
 
             {/* Submit Button */}

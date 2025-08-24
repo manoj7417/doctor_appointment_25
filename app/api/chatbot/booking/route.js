@@ -118,6 +118,31 @@ export async function POST(req) {
             paymentStatus,
         } = body;
 
+        // Check slot availability before creating booking
+        const appointmentDateObj = new Date(appointmentDate);
+        const startOfDay = new Date(appointmentDateObj);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(appointmentDateObj);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const existingSlotBooking = await bookingModel.findOne({
+            doctorId,
+            appointmentDate: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            },
+            slot: slot,
+            status: { $in: ['confirmed', 'pending'] }
+        });
+
+        if (existingSlotBooking) {
+            return NextResponse.json(
+                { success: false, message: 'Selected slot is not available. Please choose another slot.' },
+                { status: 409 }
+            );
+        }
+
         const booking = new bookingModel({
             patientName,
             patientPhone,
