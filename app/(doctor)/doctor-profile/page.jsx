@@ -4,26 +4,56 @@ import { useDoctorStore } from "@/store/doctorStore";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
-// Available time slots
+// Available time slots with 15-minute intervals
 const timeSlots = [
   "8:00 am",
+  "8:15 am",
   "8:30 am",
+  "8:45 am",
   "9:00 am",
+  "9:15 am",
   "9:30 am",
+  "9:45 am",
   "10:00 am",
+  "10:15 am",
   "10:30 am",
+  "10:45 am",
   "11:00 am",
+  "11:15 am",
   "11:30 am",
+  "11:45 am",
   "12:00 pm",
+  "12:15 pm",
   "12:30 pm",
+  "12:45 pm",
+  "1:00 pm",
+  "1:15 pm",
+  "1:30 pm",
+  "1:45 pm",
   "2:00 pm",
+  "2:15 pm",
   "2:30 pm",
+  "2:45 pm",
   "3:00 pm",
+  "3:15 pm",
   "3:30 pm",
+  "3:45 pm",
   "4:00 pm",
+  "4:15 pm",
   "4:30 pm",
+  "4:45 pm",
   "5:00 pm",
+  "5:15 pm",
   "5:30 pm",
+  "5:45 pm",
+  "6:00 pm",
+  "6:15 pm",
+  "6:30 pm",
+  "6:45 pm",
+  "7:00 pm",
+  "7:15 pm",
+  "7:30 pm",
+  "7:45 pm",
 ];
 
 // Days of week for availability
@@ -39,14 +69,32 @@ const daysOfWeek = [
 
 // Specializations for dropdown
 const specializations = [
-  "Cardiology",
-  "Dermatology",
-  "Neurology",
-  "Orthopedics",
-  "Pediatrics",
-  "Psychiatry",
-  "Radiology",
-  "Surgery",
+  "General Physician",
+  "Pediatrician",
+  "Cardiologist",
+  "Neurologist",
+  "Psychiatrist",
+  "Dermatologist",
+  "Orthopedic Surgeon",
+  "ENT Specialist",
+  "Ophthalmologist",
+  "Dentist",
+  "Gynecologist / Obstetrician",
+  "Oncologist",
+  "Endocrinologist",
+  "Gastroenterologist",
+  "Pulmonologist",
+  "Nephrologist",
+  "Urologist",
+  "Rheumatologist",
+  "Allergist / Immunologist",
+  "Hematologist",
+  "Radiologist",
+  "Anesthesiologist",
+  "Plastic / Cosmetic Surgeon",
+  "Psychologist",
+  "Physiotherapist",
+  "Dietitian / Nutritionist",
 ];
 
 // Common medical services
@@ -481,18 +529,18 @@ export default function DoctorProfileForm() {
                   htmlFor="feesPerConsultation"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Consultation Fee ($)
+                  Consultation Fee (₹)
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                    $
+                    ₹
                   </span>
                   <input
                     id="feesPerConsultation"
                     name="feesPerConsultation"
                     type="number"
                     min="0"
-                    placeholder="e.g. 100"
+                    placeholder="e.g. 500"
                     value={formData.feesPerConsultation}
                     onChange={handleInputChange}
                     className="w-full p-3 pl-8 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
@@ -622,10 +670,18 @@ export default function DoctorProfileForm() {
                       id="virtual-consultation"
                       type="checkbox"
                       checked={formData.virtualConsultation}
-                      onChange={(e) => setFormData(prev => ({ ...prev, virtualConsultation: e.target.checked }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          virtualConsultation: e.target.checked,
+                        }))
+                      }
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="virtual-consultation" className="ml-2 text-sm text-gray-700">
+                    <label
+                      htmlFor="virtual-consultation"
+                      className="ml-2 text-sm text-gray-700"
+                    >
                       Virtual Consultation (Video/Phone)
                     </label>
                   </div>
@@ -634,10 +690,18 @@ export default function DoctorProfileForm() {
                       id="in-person-consultation"
                       type="checkbox"
                       checked={formData.inPersonConsultation}
-                      onChange={(e) => setFormData(prev => ({ ...prev, inPersonConsultation: e.target.checked }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          inPersonConsultation: e.target.checked,
+                        }))
+                      }
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="in-person-consultation" className="ml-2 text-sm text-gray-700">
+                    <label
+                      htmlFor="in-person-consultation"
+                      className="ml-2 text-sm text-gray-700"
+                    >
                       In-Person Consultation
                     </label>
                   </div>

@@ -1,18 +1,7 @@
 import { connectDB } from '@/lib/dbConfig';
 import bookingModel from '@/models/bookingModel';
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-// Helper function to verify JWT token
-const verifyToken = (token) => {
-    try {
-        return jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-        return null;
-    }
-};
 
 // Helper function to check slot availability
 const checkSlotAvailability = async (doctorId, appointmentDate, slot) => {
@@ -47,23 +36,8 @@ export async function POST(req) {
             paymentMethod,
             paymentDetails,
             paymentStatus,
-            notes,
-            token: authToken // JWT token from cookies
+            notes
         } = body;
-
-        // Verify authentication and get user info
-        let userId = null;
-        let bookingType = 'guest';
-        let userEmail = null;
-
-        if (authToken) {
-            const decoded = verifyToken(authToken);
-            if (decoded) {
-                userId = decoded.userId;
-                bookingType = 'authenticated';
-                userEmail = patientEmail || decoded.email;
-            }
-        }
 
         // Check slot availability
         const isSlotAvailable = await checkSlotAvailability(doctorId, new Date(appointmentDate), slot);
@@ -84,10 +58,9 @@ export async function POST(req) {
 
         // Create booking
         const booking = new bookingModel({
-            userId,
             patientName,
             patientPhone,
-            patientEmail: userEmail,
+            patientEmail,
             doctorId,
             doctorName,
             specialization,
@@ -98,7 +71,7 @@ export async function POST(req) {
             paymentStatus,
             paymentDetails,
             token,
-            bookingType,
+            bookingType: 'guest',
             notes
         });
 
@@ -115,16 +88,11 @@ export async function POST(req) {
 
             const smsMessage = `Hi ${patientName}! Your appointment with Dr. ${doctorName} (${specialization}) on ${formattedDate} at ${formattedTime} is confirmed. Your token number is: ${token}. Please arrive 10 minutes before your appointment. Thank you!`;
 
-            console.log('Sending SMS to:', `+91${patientPhone}`);
-            console.log('SMS Message:', smsMessage);
-
             const smsResult = await twilioClient.messages.create({
                 body: smsMessage,
                 from: '+19204813393',
                 to: `+91${patientPhone}`,
             });
-
-            console.log('SMS sent successfully:', smsResult.sid);
 
         } catch (smsError) {
             console.error('SMS sending failed:', smsError);
@@ -156,31 +124,12 @@ export async function POST(req) {
     }
 }
 
-// Get bookings for authenticated user
+// Get all bookings (no authentication required)
 export async function GET(req) {
     await connectDB();
 
     try {
-        const { searchParams } = new URL(req.url);
-        const token = req.cookies.get('token')?.value;
-
-        if (!token) {
-            return NextResponse.json(
-                { success: false, message: 'Authentication required' },
-                { status: 401 }
-            );
-        }
-
-        const decoded = verifyToken(token);
-        if (!decoded) {
-            return NextResponse.json(
-                { success: false, message: 'Invalid token' },
-                { status: 401 }
-            );
-        }
-
-        const userId = decoded.userId;
-        const bookings = await bookingModel.find({ userId })
+        const bookings = await bookingModel.find()
             .populate('doctorId', 'name specialization hospital')
             .sort({ appointmentDate: -1 });
 

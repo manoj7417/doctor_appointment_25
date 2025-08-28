@@ -1,12 +1,6 @@
 const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema({
-    // User information (if authenticated)
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: false // Optional for guest bookings
-    },
     patientName: {
         type: String,
         required: true,
@@ -96,7 +90,6 @@ const bookingSchema = new mongoose.Schema({
 
 // Index for better query performance
 bookingSchema.index({ doctorId: 1, appointmentDate: 1, slot: 1 });
-bookingSchema.index({ userId: 1, appointmentDate: 1 });
 bookingSchema.index({ patientPhone: 1 });
 
 module.exports = mongoose.models.Booking || mongoose.model("Booking", bookingSchema);

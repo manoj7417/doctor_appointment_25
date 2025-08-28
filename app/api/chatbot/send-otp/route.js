@@ -16,15 +16,12 @@ export async function POST(req) {
         // Generate a simple 6-digit OTP
         const otpCode = Math.floor(100000 + Math.random() * 900000);
 
-        // Clean phone number (remove +91 if present)
-        const cleanPhone = phone.replace(/^\+91/, '');
-
-        // Send OTP using BulkSMS
-
+        // Send OTP using BulkSMS (phone already has +91 from frontend)
         const smsResult = await bulkSmsService.sendOtp(phone, otpCode.toString());
 
         if (smsResult.success) {
-            // Store OTP for verification
+            // Store OTP for verification (use clean phone without +91 for storage)
+            const cleanPhone = phone.replace(/^\+91/, '');
             otpStore.set(cleanPhone, {
                 code: otpCode.toString(),
                 timestamp: Date.now()

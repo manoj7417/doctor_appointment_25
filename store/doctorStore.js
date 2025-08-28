@@ -41,16 +41,12 @@ export const useDoctorStore = create(
 
             // Set complete doctor data (e.g., after fetching from DB)
             setDoctorData: (data) => {
-                if (typeof window !== "undefined") {
-                    console.log("Setting doctor data:", data);
-                }
                 set((state) => ({ ...state, ...data }));
             },
 
             // Clear store
             clearDoctorData: () => {
                 if (typeof window !== "undefined") {
-                    console.log("Clearing doctor data");
                     // Clear localStorage directly to ensure complete cleanup
                     localStorage.removeItem("doctor-storage");
                 }

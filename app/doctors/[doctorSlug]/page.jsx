@@ -23,10 +23,10 @@ const DoctorDescriptionPage = () => {
     async function fetchDoctor() {
       try {
         setLoading(true);
-        
+
         // Extract doctor ID from slug
         const doctorId = extractDoctorIdFromSlug(doctorSlug);
-        
+
         if (!doctorId) {
           setError("Invalid doctor URL");
           setLoading(false);
@@ -94,7 +94,7 @@ const DoctorDescriptionPage = () => {
   // Extract doctor data with fallbacks
   const {
     name = "Doctor Name",
-    image = "/default-doctor.png",
+    image = "/doc1.png",
     specialization = "General Medicine",
     experience = 0,
     degree = "MD",
@@ -110,7 +110,7 @@ const DoctorDescriptionPage = () => {
     email = "",
     phone = "",
     slots = {},
-    status = "pending"
+    status = "pending",
   } = doctor;
 
   return (
@@ -141,13 +141,12 @@ const DoctorDescriptionPage = () => {
                     alt={name}
                     className="w-full h-auto rounded-xl shadow-md transform group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
-                      e.target.src = "/default-doctor.png";
+                      e.target.src = "/doc1.png";
+                      e.target.onerror = null;
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                    <span className="text-white font-medium">
-                      {hospital}
-                    </span>
+                    <span className="text-white font-medium">{hospital}</span>
                   </div>
                 </div>
 
@@ -196,27 +195,21 @@ const DoctorDescriptionPage = () => {
                         Specialization
                       </span>
                     </div>
-                    <p className="font-semibold mt-1">
-                      {specialization}
-                    </p>
+                    <p className="font-semibold mt-1">{specialization}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-xl">
                     <div className="flex items-center">
                       <FaGraduationCap className="text-blue-500 mr-2" />
                       <span className="text-sm text-gray-500">Degree</span>
                     </div>
-                    <p className="font-semibold mt-1">
-                      {degree}
-                    </p>
+                    <p className="font-semibold mt-1">{degree}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-xl">
                     <div className="flex items-center">
                       <MdHealthAndSafety className="text-blue-500 mr-2" />
                       <span className="text-sm text-gray-500">Experience</span>
                     </div>
-                    <p className="font-semibold mt-1">
-                      {experience} years
-                    </p>
+                    <p className="font-semibold mt-1">{experience} years</p>
                   </div>
                 </div>
 
@@ -228,7 +221,9 @@ const DoctorDescriptionPage = () => {
                       <div className="bg-blue-50 p-4 rounded-xl">
                         <div className="flex items-center">
                           <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
-                          <span className="font-medium">Virtual Consultation</span>
+                          <span className="font-medium">
+                            Virtual Consultation
+                          </span>
                         </div>
                         <p className="text-sm text-gray-600 mt-1">
                           Available for online appointments
@@ -239,7 +234,9 @@ const DoctorDescriptionPage = () => {
                       <div className="bg-green-50 p-4 rounded-xl">
                         <div className="flex items-center">
                           <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                          <span className="font-medium">In-Person Consultation</span>
+                          <span className="font-medium">
+                            In-Person Consultation
+                          </span>
                         </div>
                         <p className="text-sm text-gray-600 mt-1">
                           Available for physical appointments
@@ -290,38 +287,39 @@ const DoctorDescriptionPage = () => {
                 {/* Time Slots Section */}
                 {slots && Object.keys(slots).length > 0 && (
                   <div className="mb-8">
-                    <h3 className="text-xl font-bold mb-4">Available Time Slots</h3>
+                    <h3 className="text-xl font-bold mb-4">
+                      Available Time Slots
+                    </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {Object.entries(slots).map(([day, timeSlots]) => (
                         <div key={day} className="bg-gray-50 p-4 rounded-xl">
                           <h4 className="font-semibold mb-2">{day}</h4>
                           <div className="flex flex-wrap gap-2">
-                            {Array.isArray(timeSlots) && timeSlots.map((slot, index) => (
-                              <span
-                                key={index}
-                                className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                              >
-                                {slot}
-                              </span>
-                            ))}
+                            {Array.isArray(timeSlots) &&
+                              timeSlots.map((slot, index) => (
+                                <span
+                                  key={index}
+                                  className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                                >
+                                  {slot}
+                                </span>
+                              ))}
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
-
-
               </div>
             </div>
           </div>
         </div>
       </div>
-      
+
       {/* Booking ChatBot */}
       <BookingChatBot doctorId={extractDoctorIdFromSlug(doctorSlug)} />
     </div>
   );
 };
 
-export default DoctorDescriptionPage; 
+export default DoctorDescriptionPage;

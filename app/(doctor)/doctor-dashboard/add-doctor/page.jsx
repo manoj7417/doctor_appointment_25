@@ -23,28 +23,109 @@ import {
 import { upload } from "@imagekit/next";
 import { useClientDoctorStore } from "@/lib/hooks/useClientStore";
 
-// Available time slots
+// Available time slots with 15-minute intervals
 const timeSlots = [
-  "8:00 am", "8:30 am", "9:00 am", "9:30 am", "10:00 am", "10:30 am",
-  "11:00 am", "11:30 am", "12:00 pm", "12:30 pm", "2:00 pm", "2:30 pm",
-  "3:00 pm", "3:30 pm", "4:00 pm", "4:30 pm", "5:00 pm", "5:30 pm",
+  "8:00 am",
+  "8:15 am",
+  "8:30 am",
+  "8:45 am",
+  "9:00 am",
+  "9:15 am",
+  "9:30 am",
+  "9:45 am",
+  "10:00 am",
+  "10:15 am",
+  "10:30 am",
+  "10:45 am",
+  "11:00 am",
+  "11:15 am",
+  "11:30 am",
+  "11:45 am",
+  "12:00 pm",
+  "12:15 pm",
+  "12:30 pm",
+  "12:45 pm",
+  "1:00 pm",
+  "1:15 pm",
+  "1:30 pm",
+  "1:45 pm",
+  "2:00 pm",
+  "2:15 pm",
+  "2:30 pm",
+  "2:45 pm",
+  "3:00 pm",
+  "3:15 pm",
+  "3:30 pm",
+  "3:45 pm",
+  "4:00 pm",
+  "4:15 pm",
+  "4:30 pm",
+  "4:45 pm",
+  "5:00 pm",
+  "5:15 pm",
+  "5:30 pm",
+  "5:45 pm",
+  "6:00 pm",
+  "6:15 pm",
+  "6:30 pm",
+  "6:45 pm",
+  "7:00 pm",
+  "7:15 pm",
+  "7:30 pm",
+  "7:45 pm",
 ];
 
 // Days of week for availability
 const daysOfWeek = [
-  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
 ];
 
 // Specializations for dropdown
 const specializations = [
-  "Cardiology", "Dermatology", "Neurology", "Orthopedics", "Pediatrics",
-  "Psychiatry", "Radiology", "Surgery",
+  "General Physician",
+  "Pediatrician",
+  "Cardiologist",
+  "Neurologist",
+  "Psychiatrist",
+  "Dermatologist",
+  "Orthopedic Surgeon",
+  "ENT Specialist",
+  "Ophthalmologist",
+  "Dentist",
+  "Gynecologist / Obstetrician",
+  "Oncologist",
+  "Endocrinologist",
+  "Gastroenterologist",
+  "Pulmonologist",
+  "Nephrologist",
+  "Urologist",
+  "Rheumatologist",
+  "Allergist / Immunologist",
+  "Hematologist",
+  "Radiologist",
+  "Anesthesiologist",
+  "Plastic / Cosmetic Surgeon",
+  "Psychologist",
+  "Physiotherapist",
+  "Dietitian / Nutritionist",
 ];
 
 // Common medical services
 const commonServices = [
-  "General Consultation", "Health Check-up", "Vaccination", "Diagnostic Tests",
-  "Minor Procedures", "Chronic Disease Management", "Emergency Care", "Telemedicine",
+  "General Consultation",
+  "Health Check-up",
+  "Vaccination",
+  "Diagnostic Tests",
+  "Minor Procedures",
+  "Chronic Disease Management",
+  "Emergency Care",
+  "Telemedicine",
 ];
 
 export default function AddDoctor() {
@@ -120,7 +201,7 @@ export default function AddDoctor() {
   const handleFileChange = async (e) => {
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
-      
+
       // Show preview immediately
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -132,7 +213,7 @@ export default function AddDoctor() {
       setUploading(true);
       try {
         const authParams = await authenticator();
-        
+
         const result = await upload({
           file,
           fileName: `doctor-${Date.now()}-${file.name}`,
@@ -189,10 +270,13 @@ export default function AddDoctor() {
     setFormData((prev) => {
       // Ensure availability structure exists
       const currentAvailability = prev.availability || {};
-      
+
       // Ensure the day structure exists
-      const currentDay = currentAvailability[day] || { isAvailable: false, slots: [] };
-      
+      const currentDay = currentAvailability[day] || {
+        isAvailable: false,
+        slots: [],
+      };
+
       return {
         ...prev,
         availability: {
@@ -211,10 +295,13 @@ export default function AddDoctor() {
     setFormData((prev) => {
       // Ensure availability structure exists
       const currentAvailability = prev.availability || {};
-      
+
       // Ensure the day structure exists
-      const currentDay = currentAvailability[day] || { isAvailable: false, slots: [] };
-      
+      const currentDay = currentAvailability[day] || {
+        isAvailable: false,
+        slots: [],
+      };
+
       const currentSlots = currentDay.slots || [];
       const updatedSlots = currentSlots.includes(slot)
         ? currentSlots.filter((s) => s !== slot)
@@ -248,7 +335,7 @@ export default function AddDoctor() {
 
   const validateStep2 = () => {
     const newErrors = {};
-    
+
     console.log("Validating Step 2 - formData:", formData);
 
     if (!formData.specialization) {
@@ -296,7 +383,10 @@ export default function AddDoctor() {
       if (!urlPattern.test(formData.websiteUrl.trim())) {
         newErrors.websiteUrl =
           "Please enter a valid website URL (e.g., https://example.com)";
-        console.log("Website URL format validation failed:", formData.websiteUrl);
+        console.log(
+          "Website URL format validation failed:",
+          formData.websiteUrl
+        );
       }
     }
 
@@ -314,7 +404,8 @@ export default function AddDoctor() {
       let noSlotsError = false;
       Object.entries(formData.availability).forEach(([day, dayData]) => {
         if (
-          dayData && dayData.isAvailable &&
+          dayData &&
+          dayData.isAvailable &&
           (!dayData.slots || dayData.slots.length === 0)
         ) {
           noSlotsError = true;
@@ -352,22 +443,23 @@ export default function AddDoctor() {
 
   const handleExistingDoctor = async () => {
     console.log("Scenario: Existing Doctor - checking store and fetching data");
-    
+
     // First check if we have doctor data in the store
     console.log("Doctor data from store:", currentDoctor);
-    
+
     // Check if we have basic info in the store
-    const hasStoreData = currentDoctor && currentDoctor.name && currentDoctor.email;
-    
+    const hasStoreData =
+      currentDoctor && currentDoctor.name && currentDoctor.email;
+
     if (hasStoreData) {
       console.log("Found doctor data in store, pre-filling from store");
-      
+
       // Pre-fill basic information from store
-      setValue('name', currentDoctor.name || '');
-      setValue('email', currentDoctor.email || '');
-      setValue('phone', currentDoctor.phone || '');
-      setValue('address', currentDoctor.address || '');
-      
+      setValue("name", currentDoctor.name || "");
+      setValue("email", currentDoctor.email || "");
+      setValue("phone", currentDoctor.phone || "");
+      setValue("address", currentDoctor.address || "");
+
       // Initialize availability structure properly
       const initialAvailability = {};
       daysOfWeek.forEach((day) => {
@@ -376,9 +468,9 @@ export default function AddDoctor() {
           slots: [],
         };
       });
-      
+
       // Pre-fill professional information if available
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         specialization: currentDoctor.specialization || "",
         experience: currentDoctor.experience || "",
@@ -401,30 +493,31 @@ export default function AddDoctor() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-    
+
     // If no store data, try to fetch from API
     console.log("No store data found, fetching from API");
     try {
-      const response = await fetch('/api/doctor/dashboard', {
-        method: 'GET',
-        credentials: 'include',
+      const response = await fetch("/api/doctor/dashboard", {
+        method: "GET",
+        credentials: "include",
       });
 
       if (response.ok) {
         const result = await response.json();
         console.log("Existing doctor data from API:", result);
-        
+
         if (result.doctor && result.doctor.name && result.doctor.email) {
           // Check if doctor has basic information
-          const hasBasicInfo = result.doctor.name && result.doctor.email && result.doctor.phone;
-          
+          const hasBasicInfo =
+            result.doctor.name && result.doctor.email && result.doctor.phone;
+
           if (hasBasicInfo) {
             // Pre-fill basic information
-            setValue('name', result.doctor.name || '');
-            setValue('email', result.doctor.email || '');
-            setValue('phone', result.doctor.phone || '');
-            setValue('address', result.doctor.address || '');
-            
+            setValue("name", result.doctor.name || "");
+            setValue("email", result.doctor.email || "");
+            setValue("phone", result.doctor.phone || "");
+            setValue("address", result.doctor.address || "");
+
             // Initialize availability structure properly
             const initialAvailability = {};
             daysOfWeek.forEach((day) => {
@@ -433,9 +526,9 @@ export default function AddDoctor() {
                 slots: [],
               };
             });
-            
+
             // Pre-fill professional information if available
-            setFormData(prev => ({
+            setFormData((prev) => ({
               ...prev,
               specialization: result.doctor.specialization || "",
               experience: result.doctor.experience || "",
@@ -458,11 +551,15 @@ export default function AddDoctor() {
             window.scrollTo({ top: 0, behavior: "smooth" });
           } else {
             // Doctor exists but doesn't have basic info
-            toast.error("No basic information found. Please use 'New Doctor' option instead.");
+            toast.error(
+              "No basic information found. Please use 'New Doctor' option instead."
+            );
           }
         } else {
           // No doctor data found
-          toast.error("No existing doctor profile found. Please use 'New Doctor' option to create a new profile.");
+          toast.error(
+            "No existing doctor profile found. Please use 'New Doctor' option to create a new profile."
+          );
         }
       } else {
         toast.error("Failed to fetch existing doctor data. Please try again.");
@@ -475,7 +572,7 @@ export default function AddDoctor() {
 
   const handleNewDoctor = () => {
     console.log("Scenario: New Doctor - starting with empty form");
-    
+
     // Initialize availability structure properly
     const initialAvailability = {};
     daysOfWeek.forEach((day) => {
@@ -484,7 +581,7 @@ export default function AddDoctor() {
         slots: [],
       };
     });
-    
+
     // Reset all form data for completely new doctor
     reset();
     setFormData({
@@ -502,12 +599,12 @@ export default function AddDoctor() {
       inPersonConsultation: false,
       password: "",
     });
-    
+
     // Reset image upload states
     setImageUrl(null);
     setPreviewImage(null);
     setUploading(false);
-    
+
     setErrors({});
     setFormStep(1); // Start from step 1 for new doctor
     setShowForm(true);
@@ -658,9 +755,7 @@ export default function AddDoctor() {
     return (
       <div className="max-w-4xl mx-auto p-6 my-10">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-lg p-6 mb-8 shadow-lg">
-          <h2 className="text-3xl font-bold text-white">
-            Doctor Management
-          </h2>
+          <h2 className="text-3xl font-bold text-white">Doctor Management</h2>
           <p className="text-blue-100 mt-2">
             Choose how you want to manage your doctor profile
           </p>
@@ -675,7 +770,8 @@ export default function AddDoctor() {
                 Existing Doctor
               </h3>
               <p className="text-gray-600">
-                Complete your profile with pre-filled basic information from registration.
+                Complete your profile with pre-filled basic information from
+                registration.
               </p>
             </div>
 
@@ -696,7 +792,8 @@ export default function AddDoctor() {
                 New Doctor
               </h3>
               <p className="text-gray-600">
-                Create a new doctor profile with complete professional details and availability settings.
+                Create a new doctor profile with complete professional details
+                and availability settings.
               </p>
             </div>
 
@@ -721,7 +818,9 @@ export default function AddDoctor() {
           {isNewDoctor ? "Add New Doctor" : "Complete Doctor Profile"}
         </h2>
         <p className="text-blue-100 mt-2">
-          {formStep === 1 ? "Step 1: Basic Information" : "Step 2: Professional Details & Availability"}
+          {formStep === 1
+            ? "Step 1: Basic Information"
+            : "Step 2: Professional Details & Availability"}
         </p>
       </div>
 
@@ -769,8 +868,8 @@ export default function AddDoctor() {
                     <label
                       htmlFor="profile-image"
                       className={`absolute bottom-0 right-0 rounded-full p-2 cursor-pointer shadow-md transition-colors ${
-                        uploading 
-                          ? "bg-gray-400 cursor-not-allowed" 
+                        uploading
+                          ? "bg-gray-400 cursor-not-allowed"
                           : "bg-blue-600 hover:bg-blue-700"
                       }`}
                     >
@@ -795,7 +894,7 @@ export default function AddDoctor() {
                       disabled={uploading}
                     />
                   </div>
-                  
+
                   {/* Upload Status */}
                   <div className="text-center">
                     {uploading && (
@@ -887,7 +986,9 @@ export default function AddDoctor() {
                   </div>
                   <input
                     type="text"
-                    {...register("address", { required: "Address is required" })}
+                    {...register("address", {
+                      required: "Address is required",
+                    })}
                     className={`w-full pl-10 pr-3 py-3 rounded-lg border ${
                       formErrors.address ? "border-red-500" : "border-gray-300"
                     } focus:outline-none focus:ring-2 focus:ring-blue-500`}
@@ -908,9 +1009,13 @@ export default function AddDoctor() {
                     </div>
                     <input
                       type="password"
-                      {...register("password", { required: isNewDoctor ? "Password is required" : false })}
+                      {...register("password", {
+                        required: isNewDoctor ? "Password is required" : false,
+                      })}
                       className={`w-full pl-10 pr-3 py-3 rounded-lg border ${
-                        formErrors.password ? "border-red-500" : "border-gray-300"
+                        formErrors.password
+                          ? "border-red-500"
+                          : "border-gray-300"
                       } focus:outline-none focus:ring-2 focus:ring-blue-500`}
                       placeholder="Password"
                     />
@@ -1053,18 +1158,18 @@ export default function AddDoctor() {
                   htmlFor="feesPerConsultation"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Consultation Fee ($)
+                  Consultation Fee (₹)
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                    $
+                    ₹
                   </span>
                   <input
                     id="feesPerConsultation"
                     name="feesPerConsultation"
                     type="number"
                     min="0"
-                    placeholder="e.g. 100"
+                    placeholder="e.g. 500"
                     value={formData.feesPerConsultation}
                     onChange={handleInputChange}
                     className="w-full p-3 pl-8 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
@@ -1162,7 +1267,9 @@ export default function AddDoctor() {
                         id={`day-${day}`}
                         type="checkbox"
                         checked={
-                          formData.availability && formData.availability[day]?.isAvailable || false
+                          (formData.availability &&
+                            formData.availability[day]?.isAvailable) ||
+                          false
                         }
                         onChange={() => handleDayChange(day)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -1194,10 +1301,18 @@ export default function AddDoctor() {
                       id="virtual-consultation"
                       type="checkbox"
                       checked={formData.virtualConsultation}
-                      onChange={(e) => setFormData(prev => ({ ...prev, virtualConsultation: e.target.checked }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          virtualConsultation: e.target.checked,
+                        }))
+                      }
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="virtual-consultation" className="ml-2 text-sm text-gray-700">
+                    <label
+                      htmlFor="virtual-consultation"
+                      className="ml-2 text-sm text-gray-700"
+                    >
                       Virtual Consultation (Video/Phone)
                     </label>
                   </div>
@@ -1206,10 +1321,18 @@ export default function AddDoctor() {
                       id="in-person-consultation"
                       type="checkbox"
                       checked={formData.inPersonConsultation}
-                      onChange={(e) => setFormData(prev => ({ ...prev, inPersonConsultation: e.target.checked }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          inPersonConsultation: e.target.checked,
+                        }))
+                      }
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="in-person-consultation" className="ml-2 text-sm text-gray-700">
+                    <label
+                      htmlFor="in-person-consultation"
+                      className="ml-2 text-sm text-gray-700"
+                    >
                       In-Person Consultation
                     </label>
                   </div>
@@ -1273,7 +1396,8 @@ export default function AddDoctor() {
                 <div className="space-y-6">
                   {daysOfWeek.map(
                     (day) =>
-                      formData.availability && formData.availability[day]?.isAvailable && (
+                      formData.availability &&
+                      formData.availability[day]?.isAvailable && (
                         <div
                           key={day}
                           className="border-b border-gray-200 pb-6 last:border-0"
@@ -1288,29 +1412,33 @@ export default function AddDoctor() {
                                 type="button"
                                 onClick={() => toggleTimeSlot(day, slot)}
                                 className={`p-3 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center ${
-                                  formData.availability && formData.availability[day]?.slots?.includes(slot)
+                                  formData.availability &&
+                                  formData.availability[day]?.slots?.includes(
+                                    slot
+                                  )
                                     ? "bg-blue-600 text-white border-blue-600"
                                     : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
                                 }`}
                               >
                                 {slot}
-                                {formData.availability && formData.availability[day]?.slots?.includes(
-                                  slot
-                                ) && (
-                                  <svg
-                                    className="ml-1 h-4 w-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M5 13l4 4L19 7"
-                                    />
-                                  </svg>
-                                )}
+                                {formData.availability &&
+                                  formData.availability[day]?.slots?.includes(
+                                    slot
+                                  ) && (
+                                    <svg
+                                      className="ml-1 h-4 w-4"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M5 13l4 4L19 7"
+                                      />
+                                    </svg>
+                                  )}
                               </button>
                             ))}
                           </div>
@@ -1324,18 +1452,19 @@ export default function AddDoctor() {
                       <p className="text-sm text-blue-800">
                         <span className="font-medium">Summary:</span> You have
                         selected {countSelectedSlots()} time slots across{" "}
-                        {
-                          formData.availability && Object.values(formData.availability).filter(
+                        {formData.availability &&
+                          Object.values(formData.availability).filter(
                             (day) => day && day.isAvailable
-                          ).length
-                        }{" "}
+                          ).length}{" "}
                         days.
                       </p>
                     </div>
                   )}
 
                   {errors.timeSlots && (
-                    <p className="mt-2 text-sm text-red-600">{errors.timeSlots}</p>
+                    <p className="mt-2 text-sm text-red-600">
+                      {errors.timeSlots}
+                    </p>
                   )}
                 </div>
               </div>
@@ -1415,4 +1544,4 @@ export default function AddDoctor() {
       </form>
     </div>
   );
-} 
+}

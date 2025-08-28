@@ -171,16 +171,11 @@ export async function POST(req) {
 
             const smsMessage = `Hi! Your appointment with Dr. ${doctorName} (${specialization}) on ${formattedDate} at ${formattedTime} is confirmed. Your token number is: ${token}. Please arrive 10 minutes before your appointment. Thank you!`;
 
-            console.log('Sending SMS to:', `+91${patientPhone}`);
-            console.log('SMS Message:', smsMessage);
-
             const smsResult = await twilioClient.messages.create({
                 body: smsMessage,
                 from: '+19204813393',
                 to: `+91${patientPhone}`,
             });
-
-            console.log('SMS sent successfully:', smsResult.sid);
 
         } catch (smsError) {
             console.error('SMS sending failed:', smsError);

@@ -62,21 +62,7 @@ export default function DoctorSidebar() {
               <FaUserMd className="mr-3 text-gray-500 group-hover:text-gray-500" />
               Patients
             </Link>
-            <Link
-              href="/doctor-dashboard/analytics"
-              className="flex items-center px-2 py-3 text-sm font-medium rounded-md text-gray-900 hover:bg-gray-100 group"
-            >
-              <FaChartLine className="mr-3 text-gray-500 group-hover:text-gray-500" />
-              Analytics
-            </Link>
-            <Link
-              href="/doctor-dashboard/settings"
-              className="flex items-center px-2 py-3 text-sm font-medium rounded-md text-gray-900 hover:bg-gray-100 group"
-            >
-              <FaCog className="mr-3 text-gray-500 group-hover:text-gray-500" />
-              Settings
-            </Link>
-            
+
             {/* Add Doctors Link */}
             <Link
               href="/doctor-dashboard/add-doctor"
@@ -85,7 +71,7 @@ export default function DoctorSidebar() {
               <FaUserPlus className="mr-3 text-gray-500 group-hover:text-gray-500" />
               Add Doctors
             </Link>
-            
+
             {/* Services Link */}
             <Link
               href="/doctor-dashboard/services"

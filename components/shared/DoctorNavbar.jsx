@@ -78,9 +78,13 @@ export default function DoctorNavbar() {
                 src={image} 
                 alt="Profile" 
                 className="h-8 w-8 rounded-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'block';
+                }}
               />
             ) : (
-            <FaUserCircle className="h-8 w-8 text-gray-500" />
+              <FaUserCircle className="h-8 w-8 text-gray-500" />
             )}
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-700">

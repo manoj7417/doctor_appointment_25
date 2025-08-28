@@ -30,20 +30,23 @@ export default async function sitemap() {
     try {
         await connectDB();
 
-        // Fetch all doctors
-        const doctors = await doctorModel.find({ status: "approved" }).select("name _id updatedAt");
+        // Fetch all approved doctors only
+        const doctors = await doctorModel.find({ status: "approved" }).select("name _id updatedAt image");
 
-        // Generate doctor pages
-        const doctorPages = doctors.map((doctor) => ({
-            url: `${baseUrl}/doctors/${generateDoctorSlug(doctor.name, doctor._id.toString())}`,
-            lastModified: doctor.updatedAt || new Date(),
-            changeFrequency: "weekly",
-            priority: 0.8,
-        }));
+        // Generate doctor pages - only include doctors with valid images
+        const doctorPages = doctors
+            .filter(doctor => doctor.image && doctor.image !== "/default-doctor.png")
+            .map((doctor) => ({
+                url: `${baseUrl}/doctors/${generateDoctorSlug(doctor.name, doctor._id.toString())}`,
+                lastModified: doctor.updatedAt || new Date(),
+                changeFrequency: "weekly",
+                priority: 0.8,
+            }));
 
         return [...staticPages, ...doctorPages];
     } catch (error) {
         console.error("Error generating sitemap:", error);
+        // Return only static pages if there's an error
         return staticPages;
     }
 } 

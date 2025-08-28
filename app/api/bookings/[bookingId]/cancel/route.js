@@ -1,18 +1,7 @@
 import { connectDB } from '@/lib/dbConfig';
 import bookingModel from '@/models/bookingModel';
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-// Helper function to verify JWT token
-const verifyToken = (token) => {
-    try {
-        return jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-        return null;
-    }
-};
 
 export async function PUT(req, { params }) {
     await connectDB();
@@ -20,22 +9,6 @@ export async function PUT(req, { params }) {
     try {
         const { bookingId } = params;
         const { reason } = await req.json();
-        const token = req.cookies.get('token')?.value;
-
-        if (!token) {
-            return NextResponse.json(
-                { success: false, message: 'Authentication required' },
-                { status: 401 }
-            );
-        }
-
-        const decoded = verifyToken(token);
-        if (!decoded) {
-            return NextResponse.json(
-                { success: false, message: 'Invalid token' },
-                { status: 401 }
-            );
-        }
 
         // Find the booking
         const booking = await bookingModel.findById(bookingId);
@@ -44,14 +17,6 @@ export async function PUT(req, { params }) {
             return NextResponse.json(
                 { success: false, message: 'Booking not found' },
                 { status: 404 }
-            );
-        }
-
-        // Check if user owns this booking or is admin
-        if (booking.userId && booking.userId.toString() !== decoded.userId && !decoded.isAdmin) {
-            return NextResponse.json(
-                { success: false, message: 'Unauthorized to cancel this booking' },
-                { status: 403 }
             );
         }
 

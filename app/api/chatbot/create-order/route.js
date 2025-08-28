@@ -4,15 +4,11 @@ import Razorpay from "razorpay";
 
 export async function POST(request) {
     try {
-        console.log('=== Razorpay Order Creation Started ===');
-        
         // Parse the request body
         const body = await request.json();
-        console.log('Request body:', body);
 
         // Validate required fields
         if (!body.amount || !body.currency || !body.receipt) {
-            console.log('Missing required fields:', { amount: !!body.amount, currency: !!body.currency, receipt: !!body.receipt });
             return NextResponse.json(
                 { message: "Missing required fields: amount, currency, receipt" },
                 { status: 400 }
@@ -22,10 +18,6 @@ export async function POST(request) {
         // Check environment variables
         const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
         const keySecret = process.env.RAZORPAY_SECRET;
-
-        console.log('Environment check:');
-        console.log('Key ID:', keyId ? `${keyId.substring(0, 10)}...` : 'Missing');
-        console.log('Key Secret:', keySecret ? `${keySecret.substring(0, 10)}...` : 'Missing');
 
         if (!keyId || !keySecret) {
             console.error('Razorpay credentials missing');
@@ -41,8 +33,6 @@ export async function POST(request) {
             key_secret: keySecret,
         });
 
-        console.log('Razorpay client initialized');
-
         // Create options for order creation
         const options = {
             amount: body.amount, // amount in smallest currency unit (paise for INR)
@@ -52,11 +42,8 @@ export async function POST(request) {
             notes: body.notes || {},
         };
 
-        console.log('Order options:', options);
-
         // Create order
         const order = await razorpay.orders.create(options);
-        console.log('Order created successfully:', order.id);
 
         // Return successful response with order details
         return NextResponse.json(order);

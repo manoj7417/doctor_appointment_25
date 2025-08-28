@@ -20,7 +20,7 @@ const doctorsData = [
   {
     id: 2,
     name: "Dr. Emma Watson",
-    image: "/doc2.png",
+    image: "/doc1.png",
     specialization: "Neurology",
     experience: 8,
     degree: "MBBS, DM",
@@ -33,7 +33,7 @@ const doctorsData = [
   {
     id: 3,
     name: "Dr. Rebecca Williams",
-    image: "/doc3.png",
+    image: "/doc1.png",
     specialization: "Dermatology",
     experience: 15,
     degree: "MD, DNB",
@@ -46,7 +46,7 @@ const doctorsData = [
   {
     id: 4,
     name: "Dr. James Wilson",
-    image: "/doc4.png",
+    image: "/doc1.png",
     specialization: "Orthopedics",
     experience: 20,
     degree: "MBBS, MS",
@@ -59,7 +59,7 @@ const doctorsData = [
   {
     id: 5,
     name: "Dr. Emily Rodriguez",
-    image: "/doc5.png",
+    image: "/doc1.png",
     specialization: "Pediatrics",
     experience: 6,
     degree: "MD, DCH",
@@ -72,7 +72,7 @@ const doctorsData = [
   {
     id: 6,
     name: "Dr. David Kim",
-    image: "/doc6.png",
+    image: "/doc1.png",
     specialization: "Cardiology",
     experience: 10,
     degree: "MBBS, DM",
@@ -265,6 +265,10 @@ export default function DoctorPage() {
                       src={doctor.image}
                       alt={doctor.name}
                       className="w-16 h-16 rounded-full object-cover"
+                      onError={(e) => {
+                        e.target.src = "/doc1.png";
+                        e.target.onerror = null; // Prevent infinite loop
+                      }}
                     />
                     <div>
                       <h3 className="font-bold text-lg">{doctor.name}</h3>

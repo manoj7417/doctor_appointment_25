@@ -82,7 +82,7 @@ const DoctorDescriptionPage = () => {
   // Extract doctor data with fallbacks
   const {
     name = "Doctor Name",
-    image = "/default-doctor.png",
+    image = "/doc1.png",
     specialization = "General Medicine",
     experience = 0,
     degree = "MD",
@@ -98,7 +98,7 @@ const DoctorDescriptionPage = () => {
     email = "",
     phone = "",
     slots = {},
-    status = "pending"
+    status = "pending",
   } = doctor;
 
   return (
@@ -129,13 +129,11 @@ const DoctorDescriptionPage = () => {
                     alt={name}
                     className="w-full h-auto rounded-xl shadow-md transform group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
-                      e.target.src = "/default-doctor.png";
+                      e.target.src = "/doc1.png";
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                    <span className="text-white font-medium">
-                      {hospital}
-                    </span>
+                    <span className="text-white font-medium">{hospital}</span>
                   </div>
                 </div>
 
@@ -146,9 +144,7 @@ const DoctorDescriptionPage = () => {
                       <FaRegClock className="text-blue-500 text-xl mr-3" />
                       <div>
                         <p className="text-sm text-gray-500">Availability</p>
-                        <p className="font-medium">
-                          {availability.join(", ")}
-                        </p>
+                        <p className="font-medium">{availability.join(", ")}</p>
                       </div>
                     </div>
                   )}
@@ -215,27 +211,21 @@ const DoctorDescriptionPage = () => {
                         Specialization
                       </span>
                     </div>
-                    <p className="font-semibold mt-1">
-                      {specialization}
-                    </p>
+                    <p className="font-semibold mt-1">{specialization}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-xl">
                     <div className="flex items-center">
                       <FaGraduationCap className="text-blue-500 mr-2" />
                       <span className="text-sm text-gray-500">Degree</span>
                     </div>
-                    <p className="font-semibold mt-1">
-                      {degree}
-                    </p>
+                    <p className="font-semibold mt-1">{degree}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-xl">
                     <div className="flex items-center">
                       <MdHealthAndSafety className="text-blue-500 mr-2" />
                       <span className="text-sm text-gray-500">Experience</span>
                     </div>
-                    <p className="font-semibold mt-1">
-                      {experience} years
-                    </p>
+                    <p className="font-semibold mt-1">{experience} years</p>
                   </div>
                 </div>
 
@@ -245,33 +235,57 @@ const DoctorDescriptionPage = () => {
                     <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
                     Consultation Types
                   </h3>
-                  
+
                   {virtualConsultation && inPersonConsultation ? (
                     // Both consultation types available - show prominent indicator
                     <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 p-4 rounded-lg">
                       <div className="flex items-center mb-3">
                         <div className="bg-purple-100 p-2 rounded-full mr-3">
-                          <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                          <svg
+                            className="w-6 h-6 text-purple-600"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
                         <div>
-                          <h4 className="text-lg font-semibold text-purple-800">Flexible Consultation Options</h4>
-                          <p className="text-sm text-purple-600">Choose between virtual or in-person appointments</p>
+                          <h4 className="text-lg font-semibold text-purple-800">
+                            Flexible Consultation Options
+                          </h4>
+                          <p className="text-sm text-purple-600">
+                            Choose between virtual or in-person appointments
+                          </p>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="flex items-center bg-green-50 p-3 rounded-lg">
-                          <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <svg
+                            className="w-5 h-5 text-green-600 mr-2"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
                             <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                           </svg>
-                          <span className="text-green-800 font-medium">Virtual Consultation</span>
+                          <span className="text-green-800 font-medium">
+                            Virtual Consultation
+                          </span>
                         </div>
                         <div className="flex items-center bg-blue-50 p-3 rounded-lg">
-                          <svg className="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          <svg
+                            className="w-5 h-5 text-blue-600 mr-2"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                              clipRule="evenodd"
+                            />
                           </svg>
-                          <span className="text-blue-800 font-medium">In-Person Consultation</span>
+                          <span className="text-blue-800 font-medium">
+                            In-Person Consultation
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -280,18 +294,34 @@ const DoctorDescriptionPage = () => {
                     <div className="flex flex-wrap gap-3">
                       {virtualConsultation && (
                         <div className="flex items-center bg-green-50 p-3 rounded-lg">
-                          <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <svg
+                            className="w-5 h-5 text-green-600 mr-2"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
                             <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                           </svg>
-                          <span className="text-green-800 font-medium">Virtual Consultation Available</span>
+                          <span className="text-green-800 font-medium">
+                            Virtual Consultation Available
+                          </span>
                         </div>
                       )}
                       {inPersonConsultation && (
                         <div className="flex items-center bg-blue-50 p-3 rounded-lg">
-                          <svg className="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          <svg
+                            className="w-5 h-5 text-blue-600 mr-2"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                              clipRule="evenodd"
+                            />
                           </svg>
-                          <span className="text-blue-800 font-medium">In-Person Consultation Available</span>
+                          <span className="text-blue-800 font-medium">
+                            In-Person Consultation Available
+                          </span>
                         </div>
                       )}
                     </div>
@@ -304,9 +334,7 @@ const DoctorDescriptionPage = () => {
                     <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
                     About {name}
                   </h2>
-                  <p className="text-gray-700 leading-relaxed">
-                    {about}
-                  </p>
+                  <p className="text-gray-700 leading-relaxed">{about}</p>
                 </div>
 
                 {/* Services Section */}
@@ -344,13 +372,19 @@ const DoctorDescriptionPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {Object.entries(slots).map(([day, timeSlots]) => (
                         <div key={day} className="bg-gray-50 p-4 rounded-lg">
-                          <h3 className="font-semibold text-gray-800 mb-2">{day}</h3>
+                          <h3 className="font-semibold text-gray-800 mb-2">
+                            {day}
+                          </h3>
                           <div className="flex flex-wrap gap-2">
-                            {Array.isArray(timeSlots) && timeSlots.map((slot, index) => (
-                              <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-                                {slot}
-                              </span>
-                            ))}
+                            {Array.isArray(timeSlots) &&
+                              timeSlots.map((slot, index) => (
+                                <span
+                                  key={index}
+                                  className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                                >
+                                  {slot}
+                                </span>
+                              ))}
                           </div>
                         </div>
                       ))}
@@ -367,10 +401,8 @@ const DoctorDescriptionPage = () => {
                   <div className="bg-blue-50 p-6 rounded-xl">
                     <p className="text-center text-gray-600">
                       This doctor has an average rating of{" "}
-                      <span className="font-bold">
-                        {rating}/5
-                      </span>{" "}
-                      from patient reviews.
+                      <span className="font-bold">{rating}/5</span> from patient
+                      reviews.
                     </p>
                     <div className="mt-4 flex justify-center">
                       <button className="text-blue-600 font-medium hover:text-blue-800 transition-colors">

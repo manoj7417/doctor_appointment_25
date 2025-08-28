@@ -12,7 +12,7 @@ const doctorSchema = new mongoose.Schema(
         },
         image: {
             type: String,
-            default: "/default-doctor.png"
+            default: "/doc1.png"
         },
         phone: {
             type: String,

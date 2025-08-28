@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Script from "next/script";
 import { useDoctorStore } from "@/store/doctorStore";
-import { useUserStore } from "@/store/userStore";
+
 import useBookingStore from "@/store/bookingStore";
 import { handleBooking } from "@/lib/bookingUtils";
 
@@ -28,6 +28,7 @@ export default function BookingChatBot({ doctorId }) {
   const [otp, setOtp] = useState("");
   const [isVerified, setIsVerified] = useState(false);
   const [patientName, setPatientName] = useState("");
+  const [patientEmail, setPatientEmail] = useState("");
   const [message, setMessage] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -36,7 +37,6 @@ export default function BookingChatBot({ doctorId }) {
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [razorpayOrder, setRazorpayOrder] = useState(null);
 
-  const { user, clearUser } = useUserStore();
   const { setBookingDetails } = useBookingStore();
   // const doctor = useDoctorStore((state) => state);
   // const {
@@ -224,8 +224,25 @@ export default function BookingChatBot({ doctorId }) {
       return;
     }
 
-    setStep("showDoctors");
+    setStep("patientEmail");
     toast.success(`Welcome, ${patientName}!`);
+  };
+
+  const handlePatientEmailSubmit = () => {
+    if (!patientEmail.trim()) {
+      toast.error("Please enter your email address");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(patientEmail.trim())) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    setStep("showDoctors");
+    toast.success("Email saved successfully!");
   };
 
   const selectDoctor = (doctor) => {
@@ -375,32 +392,6 @@ export default function BookingChatBot({ doctorId }) {
     }
   };
 
-  // Send booking confirmation SMS
-  const sendBookingConfirmationSMS = async (bookingDetails) => {
-    try {
-      const response = await fetch("/api/chatbot/send-booking-sms", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bookingDetails),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        console.log("Booking confirmation SMS sent successfully:", data);
-        return data;
-      } else {
-        console.error("Failed to send booking confirmation SMS:", data.message);
-        return { success: false, message: data.message };
-      }
-    } catch (error) {
-      console.error("Error sending booking confirmation SMS:", error);
-      return { success: false, message: "Failed to send SMS" };
-    }
-  };
-
   // Save booking details using the enhanced handleBooking function
   const saveBookingDetails = async (paymentId) => {
     try {
@@ -456,7 +447,6 @@ export default function BookingChatBot({ doctorId }) {
       // Use the enhanced handleBooking function
       const booking = await handleBooking(
         bookingData,
-        user, // Pass user if authenticated
         async (booking) => {
           // Success callback
           const bookingToStore = {
@@ -477,26 +467,42 @@ export default function BookingChatBot({ doctorId }) {
           console.log("Booking saved successfully:", booking);
 
           // Send booking confirmation SMS
-          const smsDetails = {
-            phone,
-            patientName,
-            doctorName: selectedDoctor.name,
-            appointmentDate,
-            slot: selectedSlot,
-            bookingId: booking._id || paymentId,
-            hospital: selectedDoctor.hospital,
-          };
 
-          const smsResult = await sendBookingConfirmationSMS(smsDetails);
+          // Send booking confirmation email if email is provided
+          if (patientEmail) {
+            try {
+              const emailDetails = {
+                patientName,
+                doctorName: selectedDoctor.name,
+                doctorSpecialization: selectedDoctor.specialization,
+                appointmentDate,
+                slot: selectedSlot,
+                bookingId: booking._id || paymentId,
+                consultationFee: selectedDoctor.price,
+                hospital: selectedDoctor.hospital,
+              };
 
-          if (smsResult.success) {
-            toast.success(
-              `Booking confirmed! SMS sent to ${phone}. Check your phone for appointment details.`
-            );
-          } else {
-            toast.success(
-              `Booking confirmed! SMS delivery: ${smsResult.message}`
-            );
+              const emailResult = await fetch("/api/send-booking-email", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  bookingDetails: emailDetails,
+                  recipientEmail: patientEmail,
+                }),
+              });
+
+              const emailData = await emailResult.json();
+
+              if (emailData.success) {
+                toast.success("Confirmation email sent to your email address!");
+              } else {
+                console.log("Email sending failed:", emailData.message);
+              }
+            } catch (emailError) {
+              console.error("Error sending email:", emailError);
+            }
           }
 
           // Reset form and close chatbot
@@ -504,6 +510,7 @@ export default function BookingChatBot({ doctorId }) {
             setOpen(false);
             setStep("greet");
             setPatientName("");
+            setPatientEmail("");
             setPhone("");
             setOtp("");
             setIsVerified(false);
@@ -769,6 +776,54 @@ export default function BookingChatBot({ doctorId }) {
                     </div>
                     <button
                       onClick={handlePatientNameSubmit}
+                      className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center space-x-2"
+                    >
+                      <span>Continue</span>
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {step === "patientEmail" && isVerified && (
+                <div className="animate-fadeIn">
+                  <div className="bg-blue-50 p-3 rounded-lg inline-block mb-4">
+                    <p>
+                      Hi {patientName}! Please provide your email address for
+                      booking confirmation.
+                    </p>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 absolute top-3 left-3 text-gray-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <input
+                        type="email"
+                        placeholder="Enter your email address"
+                        value={patientEmail}
+                        onChange={(e) => setPatientEmail(e.target.value)}
+                        className="border rounded-lg p-2 pl-10 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            handlePatientEmailSubmit();
+                          }
+                        }}
+                      />
+                    </div>
+                    <button
+                      onClick={handlePatientEmailSubmit}
                       className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center space-x-2"
                     >
                       <span>Continue</span>
