@@ -23,19 +23,19 @@ export default function Home() {
     ];
 
     const isCustom = !mainDomains.includes(hostname);
-    
+
     if (isCustom) {
       console.log('🎯 Custom domain detected:', hostname);
       setIsCustomDomain(true);
       setCustomDomain(hostname);
-      
+
       // Redirect to the custom domain page
       window.location.href = `/doctor-domain/${hostname}`;
     } else {
       console.log('🏠 Main domain detected:', hostname);
       setIsCustomDomain(false);
     }
-    
+
     setLoading(false);
   }, []);
 
@@ -56,7 +56,7 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Redirecting to doctor's page...</p>
+          <p className="mt-4 text-gray-600">Redirecting to doctor&apos;s page...</p>
         </div>
       </div>
     );

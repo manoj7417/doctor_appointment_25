@@ -8,12 +8,28 @@ export async function POST(req) {
     try {
         await connectDB();
 
-        // Check if test doctor already exists
-        const existingDoctor = await doctorModel.findOne({ email: "drjohn@test.com" });
+        // Use a unique domain to avoid conflicts
+        const testDomain = "drjane-test.com";
+        const testEmail = "drjane@test.com";
+
+        // Check if test doctor already exists by email or domain
+        const existingDoctor = await doctorModel.findOne({
+            $or: [
+                { email: testEmail },
+                { domain: testDomain }
+            ]
+        });
+
         if (existingDoctor) {
             return NextResponse.json({
                 message: "Test doctor already exists",
-                doctor: existingDoctor
+                doctor: {
+                    _id: existingDoctor._id,
+                    name: existingDoctor.name,
+                    email: existingDoctor.email,
+                    domain: existingDoctor.domain,
+                    slug: existingDoctor.slug
+                }
             });
         }
 
@@ -21,36 +37,36 @@ export async function POST(req) {
 
         // Create test doctor with custom domain
         const doctor = await doctorModel.create({
-            name: "Dr. John Smith",
-            email: "drjohn@test.com",
-            phone: "+91-9876543210",
-            address: "123 Medical Center, Mumbai, Maharashtra",
+            name: "Dr. Jane Wilson",
+            email: testEmail,
+            phone: "+91-9876543211",
+            address: "456 Medical Center, Delhi, India",
             password: hashedPassword,
-            image: "/doc1.png",
-            specialization: "Cardiology",
-            experience: 15,
-            degree: "MBBS, MD (Cardiology)",
-            hospital: "City Heart Hospital",
-            about: "Dr. John Smith is a highly experienced cardiologist with over 15 years of practice. He specializes in interventional cardiology and has performed thousands of successful procedures. Dr. Smith is known for his compassionate care and commitment to patient well-being.",
-            price: 1500,
+            image: "/doc2.png",
+            specialization: "Dermatology",
+            experience: 12,
+            degree: "MBBS, MD (Dermatology)",
+            hospital: "Skin Care Hospital",
+            about: "Dr. Jane Wilson is a renowned dermatologist with over 12 years of experience in treating various skin conditions. She specializes in cosmetic dermatology, skin cancer treatment, and general dermatological care. Dr. Wilson is known for her gentle approach and commitment to patient care.",
+            price: 1200,
             services: [
-                "ECG",
-                "Echocardiography",
-                "Stress Test",
-                "Angioplasty",
-                "Cardiac Consultation",
-                "Heart Disease Treatment"
+                "Skin Consultation",
+                "Acne Treatment",
+                "Skin Cancer Screening",
+                "Cosmetic Procedures",
+                "Allergy Testing",
+                "Hair Loss Treatment"
             ],
-            availability: ["Mon", "Wed", "Fri", "Sat"],
+            availability: ["Tue", "Thu", "Fri", "Sat"],
             slots: {
-                "Mon": ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"],
-                "Wed": ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"],
-                "Fri": ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"],
-                "Sat": ["09:00", "10:00", "11:00"]
+                "Tue": ["10:00", "11:00", "12:00", "15:00", "16:00", "17:00"],
+                "Thu": ["10:00", "11:00", "12:00", "15:00", "16:00", "17:00"],
+                "Fri": ["10:00", "11:00", "12:00", "15:00", "16:00", "17:00"],
+                "Sat": ["10:00", "11:00", "12:00"]
             },
             hasWebsite: true,
-            websiteUrl: "https://drjohn.com",
-            domain: "drjohn.com",
+            websiteUrl: `https://${testDomain}`,
+            domain: testDomain,
             virtualConsultation: true,
             inPersonConsultation: true,
             status: "approved",
@@ -73,6 +89,15 @@ export async function POST(req) {
 
     } catch (error) {
         console.error("Error creating test doctor:", error);
+
+        // Handle duplicate key error specifically
+        if (error.code === 11000) {
+            return NextResponse.json({
+                message: "Test doctor already exists (duplicate domain or email)",
+                error: "Duplicate key error - doctor with this domain or email already exists"
+            }, { status: 409 });
+        }
+
         return NextResponse.json({
             message: "Error creating test doctor",
             error: error.message
