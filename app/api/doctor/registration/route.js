@@ -30,6 +30,7 @@ export async function POST(req) {
         slots,
         hasWebsite,
         websiteUrl,
+        domain,
         virtualConsultation,
         inPersonConsultation
     } = body;
@@ -66,6 +67,7 @@ export async function POST(req) {
             slots,
             hasWebsite: hasWebsite || false,
             websiteUrl: hasWebsite ? websiteUrl : null,
+            domain: hasWebsite ? domain : null,
             virtualConsultation: virtualConsultation || false,
             inPersonConsultation: inPersonConsultation || false,
             status: "pending",
@@ -94,6 +96,9 @@ export async function POST(req) {
                 availability: doctor.availability,
                 slots: doctor.slots,
                 status: doctor.status,
+                hasWebsite: doctor.hasWebsite,
+                websiteUrl: doctor.websiteUrl,
+                domain: doctor.domain,
                 virtualConsultation: doctor.virtualConsultation,
                 inPersonConsultation: doctor.inPersonConsultation,
             }

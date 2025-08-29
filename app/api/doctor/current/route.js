@@ -71,6 +71,7 @@ export async function GET(req) {
             inPersonConsultation: doctor.inPersonConsultation,
             hasWebsite: doctor.hasWebsite,
             websiteUrl: doctor.websiteUrl,
+            domain: doctor.domain,
         };
 
         return NextResponse.json({

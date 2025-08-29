@@ -62,6 +62,12 @@ const doctorSchema = new mongoose.Schema(
         },
         hasWebsite: { type: Boolean, default: false },
         websiteUrl: { type: String, default: null },
+        domain: {
+            type: String,  // e.g., "drjohn.com"
+            unique: true,
+            sparse: true,
+            default: null,
+        },
         address: {
             type: String,
         },

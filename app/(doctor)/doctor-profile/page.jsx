@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDoctorStore } from "@/store/doctorStore";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { validateDomain } from "@/lib/utils";
 
 // Available time slots with 15-minute intervals
 const timeSlots = [
@@ -121,6 +122,7 @@ export default function DoctorProfileForm() {
     availability: {},
     hasWebsite: "", // New field for website option
     websiteUrl: "", // Optional website URL
+    domain: "", // New field for domain
     virtualConsultation: false,
     inPersonConsultation: false,
   });
@@ -131,7 +133,7 @@ export default function DoctorProfileForm() {
   const router = useRouter();
 
   // Initialize availability structure for each day
-  useState(() => {
+  useEffect(() => {
     const initialAvailability = {};
     daysOfWeek.forEach((day) => {
       initialAvailability[day] = {
@@ -148,11 +150,20 @@ export default function DoctorProfileForm() {
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    console.log("🔍 Input change:", name, value);
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: value };
+      console.log("🔍 New form data:", newData);
+      return newData;
+    });
 
-    // Clear website URL if user selects "No" for website
+    // Clear website URL and domain if user selects "No" for website
     if (name === "hasWebsite" && value === "no") {
-      setFormData((prev) => ({ ...prev, websiteUrl: "" }));
+      setFormData((prev) => ({
+        ...prev,
+        websiteUrl: "",
+        domain: "",
+      }));
     }
 
     // Clear errors when user types
@@ -250,9 +261,14 @@ export default function DoctorProfileForm() {
     if (!formData.hasWebsite)
       newErrors.hasWebsite = "Please select whether you have a website";
 
-    // Validate website URL if user selected "yes"
-    if (formData.hasWebsite === "yes" && !formData.websiteUrl.trim()) {
-      newErrors.websiteUrl = "Website URL is required when you have a website";
+    // Validate website URL if user selected "yes" (but make it optional since domain is also available)
+    if (
+      formData.hasWebsite === "yes" &&
+      !formData.websiteUrl.trim() &&
+      !formData.domain.trim()
+    ) {
+      newErrors.websiteUrl =
+        "Either Website URL or Domain is required when you have a website";
     }
 
     // Basic URL validation if website URL is provided
@@ -261,6 +277,14 @@ export default function DoctorProfileForm() {
       if (!urlPattern.test(formData.websiteUrl.trim())) {
         newErrors.websiteUrl =
           "Please enter a valid website URL (e.g., https://example.com)";
+      }
+    }
+
+    // Validate domain if provided
+    if (formData.hasWebsite === "yes" && formData.domain.trim()) {
+      const domainValidation = validateDomain(formData.domain.trim());
+      if (!domainValidation.isValid) {
+        newErrors.domain = domainValidation.message;
       }
     }
 
@@ -344,6 +368,7 @@ export default function DoctorProfileForm() {
         slots: formattedSlots,
         hasWebsite: formData.hasWebsite === "yes",
         websiteUrl: formData.hasWebsite === "yes" ? formData.websiteUrl : null,
+        domain: formData.hasWebsite === "yes" ? formData.domain : null,
         virtualConsultation: formData.virtualConsultation,
         inPersonConsultation: formData.inPersonConsultation,
       };
@@ -419,6 +444,16 @@ export default function DoctorProfileForm() {
             style={{ width: formStep === 1 ? "50%" : "100%" }}
           ></div>
         </div>
+      </div>
+
+      {/* Debug info */}
+      <div className="bg-yellow-100 border-2 border-yellow-500 p-4 rounded-lg mb-4">
+        <h3 className="font-bold text-yellow-800">🔍 DEBUG INFO:</h3>
+        <p className="text-sm text-yellow-700">
+          hasWebsite: <strong>{formData.hasWebsite}</strong> | Domain:{" "}
+          <strong>{formData.domain}</strong> | Should show domain:{" "}
+          <strong>{formData.hasWebsite === "yes" ? "YES" : "NO"}</strong>
+        </p>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-8">
@@ -602,7 +637,7 @@ export default function DoctorProfileForm() {
               </div>
 
               {/* Website URL field - only show if user selected "Yes" */}
-              {formData.hasWebsite === "yes" && (
+              {/* {formData.hasWebsite === "yes" && (
                 <div>
                   <label
                     htmlFor="websiteUrl"
@@ -625,7 +660,34 @@ export default function DoctorProfileForm() {
                     </p>
                   )}
                 </div>
-              )}
+              )} */}
+
+              {/* Domain field - only show if user selected "Yes" */}
+              {/* {formData.hasWebsite === "yes" && (
+                <div className="border-2 border-red-500 bg-red-50 p-4 rounded-lg">
+                  <label
+                    htmlFor="domain"
+                    className="block text-sm font-bold text-red-700 mb-2"
+                  >
+                    🚨 DOMAIN FIELD - VISIBLE WHEN YES IS SELECTED 🚨
+                  </label>
+                  <input
+                    id="domain"
+                    name="domain"
+                    type="text"
+                    placeholder="e.g., drjohn.com"
+                    value={formData.domain}
+                    onChange={handleInputChange}
+                    className="w-full p-3 bg-white border-2 border-red-500 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                  />
+                  <p className="text-xs text-red-600 mt-2 font-bold">
+                    🔥 THIS FIELD SHOULD BE VISIBLE NOW! 🔥
+                  </p>
+                  {errors.domain && (
+                    <p className="mt-1 text-sm text-red-600">{errors.domain}</p>
+                  )}
+                </div>
+              )} */}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">

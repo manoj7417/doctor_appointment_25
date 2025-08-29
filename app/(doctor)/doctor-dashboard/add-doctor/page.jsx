@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { upload } from "@imagekit/next";
 import { useClientDoctorStore } from "@/lib/hooks/useClientStore";
+import { validateDomain } from "@/lib/utils";
 
 // Available time slots with 15-minute intervals
 const timeSlots = [
@@ -140,6 +141,7 @@ export default function AddDoctor() {
     availability: {},
     hasWebsite: "",
     websiteUrl: "",
+    domain: "", // New field for domain
     virtualConsultation: false,
     inPersonConsultation: false,
     password: "",
@@ -237,9 +239,13 @@ export default function AddDoctor() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear website URL if user selects "No" for website
+    // Clear website URL and domain if user selects "No" for website
     if (name === "hasWebsite" && value === "no") {
-      setFormData((prev) => ({ ...prev, websiteUrl: "" }));
+      setFormData((prev) => ({
+        ...prev,
+        websiteUrl: "",
+        domain: "",
+      }));
     }
 
     // Clear errors when user types
@@ -371,10 +377,19 @@ export default function AddDoctor() {
       console.log("HasWebsite validation failed:", formData.hasWebsite);
     }
 
-    // Validate website URL if user selected "yes"
-    if (formData.hasWebsite === "yes" && !formData.websiteUrl.trim()) {
-      newErrors.websiteUrl = "Website URL is required when you have a website";
-      console.log("Website URL validation failed:", formData.websiteUrl);
+    // Validate website URL if user selected "yes" (but make it optional since domain is also available)
+    if (
+      formData.hasWebsite === "yes" &&
+      !formData.websiteUrl.trim() &&
+      !formData.domain.trim()
+    ) {
+      newErrors.websiteUrl =
+        "Either Website URL or Domain is required when you have a website";
+      console.log(
+        "Website URL/Domain validation failed:",
+        formData.websiteUrl,
+        formData.domain
+      );
     }
 
     // Basic URL validation if website URL is provided
@@ -387,6 +402,15 @@ export default function AddDoctor() {
           "Website URL format validation failed:",
           formData.websiteUrl
         );
+      }
+    }
+
+    // Validate domain if provided
+    if (formData.hasWebsite === "yes" && formData.domain.trim()) {
+      const domainValidation = validateDomain(formData.domain.trim());
+      if (!domainValidation.isValid) {
+        newErrors.domain = domainValidation.message;
+        console.log("Domain validation failed:", domainValidation.message);
       }
     }
 
@@ -595,6 +619,7 @@ export default function AddDoctor() {
       availability: initialAvailability,
       hasWebsite: "",
       websiteUrl: "",
+      domain: "",
       virtualConsultation: false,
       inPersonConsultation: false,
       password: "",
@@ -673,6 +698,7 @@ export default function AddDoctor() {
         slots: formattedSlots,
         hasWebsite: formData.hasWebsite === "yes",
         websiteUrl: formData.hasWebsite === "yes" ? formData.websiteUrl : null,
+        domain: formData.hasWebsite === "yes" ? formData.domain : null,
         virtualConsultation: formData.virtualConsultation,
         inPersonConsultation: formData.inPersonConsultation,
       };
@@ -1252,6 +1278,33 @@ export default function AddDoctor() {
                     <p className="mt-1 text-sm text-red-600">
                       {errors.websiteUrl}
                     </p>
+                  )}
+                </div>
+              )}
+
+              {/* Domain field - only show if user selected "Yes" */}
+              {formData.hasWebsite === "yes" && (
+                <div>
+                  <label
+                    htmlFor="domain"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Domain (e.g., drjohn.com)
+                  </label>
+                  <input
+                    id="domain"
+                    name="domain"
+                    type="text"
+                    placeholder="e.g., drjohn.com"
+                    value={formData.domain}
+                    onChange={handleInputChange}
+                    className="w-full p-3 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Your unique domain name without www
+                  </p>
+                  {errors.domain && (
+                    <p className="mt-1 text-sm text-red-600">{errors.domain}</p>
                   )}
                 </div>
               )}
