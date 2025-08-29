@@ -9,6 +9,8 @@ const MAIN_DOMAINS = [
     '127.0.0.1:3000',
     'yourdomain.com',
     'www.yourdomain.com',
+    "shankarpolyclinic.com",
+    "www.shankarpolyclinic.com",
     // Add your main production domains here
 ];
 
