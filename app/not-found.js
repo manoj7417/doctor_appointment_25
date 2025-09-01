@@ -9,14 +9,14 @@ export default function NotFound() {
                     Doctor Not Found
                 </h1>
                 <p className="text-gray-600 mb-4">
-                    The doctor you're looking for doesn't exist or this domain is not associated with any doctor.
+                    The doctor you&apos;re looking for doesn&apos;t exist or this domain is not associated with any doctor.
                 </p>
-                <a
+                <Link
                     href="/"
                     className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                 >
                     Go to Homepage
-                </a>
+                </Link>
             </div>
         </div>
     );

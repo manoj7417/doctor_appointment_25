@@ -16,8 +16,12 @@ export default function DoctorDomainPage() {
         setLoading(true);
         
         console.log("🔍 Original domain parameter:", domain);
-        console.log("🔍 Current URL:", window.location.href);
-        console.log("🔍 Current pathname:", window.location.pathname);
+        
+        // Only access window.location on the client side
+        if (typeof window !== 'undefined') {
+          console.log("🔍 Current URL:", window.location.href);
+          console.log("🔍 Current pathname:", window.location.pathname);
+        }
         
         // Clean the domain parameter - remove protocol and path if present
         let cleanDomain = domain;
