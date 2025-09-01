@@ -9,9 +9,7 @@ const MAIN_DOMAINS = [
     '127.0.0.1:3000',
     'yourdomain.com',
     'www.yourdomain.com',
-    "shankarpolyclinic.com",
-    "www.shankarpolyclinic.com",
-    // Add your main production domains here
+    // IMPORTANT: remove shankarpolyclinic.com from here if it's meant to be a doctor domain
 ];
 
 export function middleware(request) {
@@ -23,27 +21,47 @@ export function middleware(request) {
     // Check if this is a custom doctor domain
     const isCustomDomain = !MAIN_DOMAINS.includes(hostname);
 
+    // Handle doctor-domain routes on main domain first
+    if (pathname.startsWith('/doctor-domain/')) {
+        console.log('🎯 Doctor domain route detected:', pathname);
+        // Let the route handler process this normally
+        return NextResponse.next();
+    }
+
+    // Prevent infinite loops - if we're already on a custom domain path, don't rewrite
+    if (isCustomDomain && pathname !== '/') {
+        console.log('🎯 Custom domain with non-root path, skipping rewrite:', pathname);
+        return NextResponse.next();
+    }
+
     if (isCustomDomain) {
         console.log('🎯 Custom domain detected:', hostname);
 
-        // Route to the custom doctor page
-        const url = request.nextUrl.clone();
-        url.pathname = `/doctor-domain/${hostname}`;
+        // Only rewrite if we're at the root path to prevent double paths
+        if (pathname === '/' || pathname === '') {
+            const url = request.nextUrl.clone();
+            url.pathname = `/doctor-domain/${hostname}`;
+            url.search = ''; // Clear any query parameters
+            url.hash = ''; // Clear any hash
 
-        return NextResponse.rewrite(url);
+            console.log('🔄 Rewriting root path to:', url.pathname);
+            return NextResponse.rewrite(url);
+        } else {
+            console.log('🎯 Non-root path on custom domain, skipping rewrite:', pathname);
+            return NextResponse.next();
+        }
     }
 
-    // Handle authentication for main domain doctor routes
+    // 🔒 Handle doctor auth only for main domains
     const doctorLoginRoute = '/doctor-login';
-    const isDoctorRoute = pathname.startsWith('/doctor-dashboard') || pathname.startsWith('/doctor-profile');
+    const isDoctorRoute =
+        pathname.startsWith('/doctor-dashboard') || pathname.startsWith('/doctor-profile');
     const isDoctorLogin = pathname === doctorLoginRoute;
 
-    // Redirect unauthenticated doctor users trying to access doctor routes
     if (isDoctorRoute && !doctorToken) {
         return NextResponse.redirect(new URL(doctorLoginRoute, request.url));
     }
 
-    // Redirect authenticated doctor away from doctor login page
     if (isDoctorLogin && doctorToken) {
         return NextResponse.redirect(new URL('/doctor-dashboard', request.url));
     }
@@ -53,14 +71,6 @@ export function middleware(request) {
 
 export const config = {
     matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - api (API routes)
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         * - public files (images, etc.)
-         */
         '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
     ],
 };

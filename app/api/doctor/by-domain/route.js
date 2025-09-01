@@ -4,12 +4,20 @@ import doctorModel from "@/models/doctorModel";
 
 export async function GET(req) {
     const { searchParams } = new URL(req.url);
-    const domain = searchParams.get('domain');
+    let domain = searchParams.get('domain');
 
     if (!domain) {
-        return NextResponse.json({ 
-            message: "Domain parameter is required" 
+        return NextResponse.json({
+            message: "Domain parameter is required"
         }, { status: 400 });
+    }
+
+    // Clean the domain parameter - remove protocol and path if present
+    if (domain.includes('://')) {
+        domain = domain.split('://')[1];
+    }
+    if (domain.includes('/')) {
+        domain = domain.split('/')[0];
     }
 
     try {
@@ -17,20 +25,20 @@ export async function GET(req) {
         console.log('🔍 Searching for doctor with domain:', domain);
 
         // Find doctor by domain field
-        const doctor = await doctorModel.findOne({ 
+        const doctor = await doctorModel.findOne({
             domain: domain,
             status: { $ne: "rejected" } // Exclude rejected doctors
         }).select('-password'); // Exclude password from response
 
         if (!doctor) {
             console.log('❌ No doctor found for domain:', domain);
-            return NextResponse.json({ 
-                message: "Doctor not found for this domain" 
+            return NextResponse.json({
+                message: "Doctor not found for this domain"
             }, { status: 404 });
         }
 
         console.log('✅ Doctor found:', doctor.name);
-        
+
         return NextResponse.json({
             message: "Doctor found successfully",
             doctor: {
@@ -61,8 +69,8 @@ export async function GET(req) {
 
     } catch (error) {
         console.error("Error fetching doctor by domain:", error);
-        return NextResponse.json({ 
-            message: "Server error" 
+        return NextResponse.json({
+            message: "Server error"
         }, { status: 500 });
     }
 }

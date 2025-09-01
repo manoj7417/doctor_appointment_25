@@ -1,106 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
 import Link from "next/link";
 
-export default function DoctorDomainPage() {
-  const params = useParams();
-  const domain = params.domain;
-  const [doctor, setDoctor] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchDoctorByDomain = async () => {
-      try {
-        setLoading(true);
-        
-        console.log("🔍 Original domain parameter:", domain);
-        console.log("🔍 Current URL:", window.location.href);
-        console.log("🔍 Current pathname:", window.location.pathname);
-        
-        // Clean the domain parameter - remove protocol and path if present
-        let cleanDomain = domain;
-        if (domain.includes('://')) {
-          cleanDomain = domain.split('://')[1];
-        }
-        if (cleanDomain.includes('/')) {
-          cleanDomain = cleanDomain.split('/')[0];
-        }
-        
-        console.log("🔍 Cleaned domain:", cleanDomain);
-
-        const response = await fetch(
-          `/api/doctor/by-domain?domain=${encodeURIComponent(cleanDomain)}`
-        );
-        const data = await response.json();
-
-        console.log("📡 API Response:", data);
-
-        if (response.ok && data.doctor) {
-          setDoctor(data.doctor);
-          console.log("✅ Doctor found:", data.doctor.name);
-        } else {
-          setError(data.message || "Doctor not found");
-          console.error("❌ Error fetching doctor:", data.message);
-        }
-      } catch (err) {
-        setError("Failed to load doctor information");
-        console.error("❌ Network error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (domain) {
-      fetchDoctorByDomain();
-    }
-  }, [domain]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading doctor information...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            Doctor Not Found
-          </h1>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <p className="text-sm text-gray-500">
-            Domain:{" "}
-            <code className="bg-gray-100 px-2 py-1 rounded">{domain}</code>
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!doctor) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            No Doctor Found
-          </h1>
-          <p className="text-gray-600">
-            This domain is not associated with any doctor.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
+export default function DoctorProfilePage({ doctor }) {
   // Extract doctor data with fallbacks
   const {
     name = "Doctor Name",
@@ -146,7 +47,9 @@ export default function DoctorDomainPage() {
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-500">Custom Domain</p>
-              <p className="text-sm font-medium text-gray-900">{doctorDomain}</p>
+              <p className="text-sm font-medium text-gray-900">
+                {doctorDomain}
+              </p>
             </div>
           </div>
         </div>
