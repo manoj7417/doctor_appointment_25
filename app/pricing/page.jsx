@@ -5,7 +5,7 @@ const tiers = [
     name: "Basic Care",
     id: "tier-basic",
     href: "#",
-    priceMonthly: "$19",
+    priceMonthly: "₹1499",
     description: "Best for individuals who need occasional consultations.",
     features: [
       "2 doctor consultations per month",
@@ -19,7 +19,7 @@ const tiers = [
     name: "Premium Care",
     id: "tier-premium",
     href: "#",
-    priceMonthly: "$49",
+    priceMonthly: "₹3999",
     description:
       "Comprehensive plan for frequent medical needs and family care.",
     features: [

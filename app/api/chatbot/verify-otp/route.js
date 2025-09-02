@@ -12,9 +12,14 @@ export async function POST(req) {
             );
         }
 
-        // Clean phone number (remove +91 if present)
-        const cleanPhone = phone.replace(/^\+91/, '');
-        const storedOtp = otpStore.get(cleanPhone);
+        // Try to get OTP with original phone format first, then with clean format
+        let storedOtp = otpStore.get(phone);
+
+        if (!storedOtp) {
+            // Try with clean phone number (remove +91 if present)
+            const cleanPhone = phone.replace(/^\+91/, '');
+            storedOtp = otpStore.get(cleanPhone);
+        }
 
         if (!storedOtp) {
             return NextResponse.json(
@@ -35,7 +40,9 @@ export async function POST(req) {
 
         // Check if OTP matches
         if (storedOtp.code === code) {
-            // Remove OTP after successful verification
+            // Remove OTP after successful verification (both formats)
+            otpStore.delete(phone);
+            const cleanPhone = phone.replace(/^\+91/, '');
             otpStore.delete(cleanPhone);
             return NextResponse.json({
                 success: true,

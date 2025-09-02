@@ -16,8 +16,25 @@ export async function POST(req) {
         // Generate a simple 6-digit OTP
         const otpCode = Math.floor(100000 + Math.random() * 900000);
 
-        // Send OTP using BulkSMS (phone already has +91 from frontend)
-        const smsResult = await bulkSmsService.sendOtp(phone, otpCode.toString());
+        // Check if we're in demo mode (no API credentials or force demo mode)
+        const forceDemoMode = process.env.FORCE_DEMO_MODE === 'true';
+        const isDemoMode = forceDemoMode || !process.env.BULKSMS_API_ID;
+
+        let smsResult;
+
+        if (isDemoMode) {
+            // Demo mode - simulate successful SMS
+            console.log('📱 DEMO MODE: Simulating SMS for phone:', phone);
+            smsResult = {
+                success: true,
+                message: 'Demo mode - OTP sent successfully',
+                data: { message_id: 'demo_' + Date.now() }
+            };
+        } else {
+            console.log('📱 PRODUCTION MODE: Sending real SMS via BulkSMS for phone:', phone);
+            // Send OTP using BulkSMS (phone already has +91 from frontend)
+            smsResult = await bulkSmsService.sendOtp(phone, otpCode.toString());
+        }
 
         if (smsResult.success) {
             // Store OTP for verification (use clean phone without +91 for storage)
@@ -27,10 +44,18 @@ export async function POST(req) {
                 timestamp: Date.now()
             });
 
+            // Also store with the original phone format as a backup
+            otpStore.set(phone, {
+                code: otpCode.toString(),
+                timestamp: Date.now()
+            });
+
             return NextResponse.json({
                 success: true,
                 message: 'OTP sent successfully!',
-                messageId: smsResult.data?.message_id
+                messageId: smsResult.data?.message_id,
+                demoMode: isDemoMode,
+                otpCode: isDemoMode ? otpCode.toString() : undefined
             });
         } else {
             throw new Error(smsResult.message || 'Failed to send OTP');

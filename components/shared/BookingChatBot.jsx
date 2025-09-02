@@ -870,7 +870,7 @@ export default function BookingChatBot({ doctorId }) {
                               </span>
                             </div>
                             <p className="text-sm text-green-600 font-medium">
-                              ${doc.price} per consultation
+                              ₹{doc.price} per consultation
                             </p>
                           </div>
                         </div>
@@ -963,7 +963,7 @@ export default function BookingChatBot({ doctorId }) {
                         <div className="mt-4">
                           <h4 className="font-medium text-gray-800">Price</h4>
                           <p className="text-lg text-green-600 font-semibold mt-1">
-                            ${selectedDoctor.price} per session
+                            ₹{selectedDoctor.price} per session
                           </p>
                         </div>
 
@@ -1123,7 +1123,7 @@ export default function BookingChatBot({ doctorId }) {
                       <div className="flex justify-between font-medium text-base pt-2 border-t">
                         <span>Total:</span>
                         <span className="text-green-600">
-                          ${selectedDoctor.price}
+                          ₹{selectedDoctor.price}
                         </span>
                       </div>
                     </div>
@@ -1159,7 +1159,7 @@ export default function BookingChatBot({ doctorId }) {
                         <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
                       ) : (
                         <>
-                          <span>Pay ${selectedDoctor.price} Securely</span>
+                          <span>Pay ₹{selectedDoctor.price} Securely</span>
                           <ChevronRight size={18} />
                         </>
                       )}

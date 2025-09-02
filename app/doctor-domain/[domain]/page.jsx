@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import BookingChatBot from "@/components/shared/BookingChatBot";
 
 export default function DoctorDomainPage() {
   const params = useParams();
@@ -14,24 +15,24 @@ export default function DoctorDomainPage() {
     const fetchDoctorByDomain = async () => {
       try {
         setLoading(true);
-        
+
         console.log("🔍 Original domain parameter:", domain);
-        
+
         // Only access window.location on the client side
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           console.log("🔍 Current URL:", window.location.href);
           console.log("🔍 Current pathname:", window.location.pathname);
         }
-        
+
         // Clean the domain parameter - remove protocol and path if present
         let cleanDomain = domain;
-        if (domain.includes('://')) {
-          cleanDomain = domain.split('://')[1];
+        if (domain.includes("://")) {
+          cleanDomain = domain.split("://")[1];
         }
-        if (cleanDomain.includes('/')) {
-          cleanDomain = cleanDomain.split('/')[0];
+        if (cleanDomain.includes("/")) {
+          cleanDomain = cleanDomain.split("/")[0];
         }
-        
+
         console.log("🔍 Cleaned domain:", cleanDomain);
 
         const response = await fetch(
@@ -63,10 +64,15 @@ export default function DoctorDomainPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading doctor information...</p>
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 mt-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -74,17 +80,21 @@ export default function DoctorDomainPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            Doctor Not Found
-          </h1>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <p className="text-sm text-gray-500">
-            Domain:{" "}
-            <code className="bg-gray-100 px-2 py-1 rounded">{domain}</code>
-          </p>
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 mt-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="text-center">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                Doctor Not Found
+              </h1>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <p className="text-sm text-gray-500">
+                Domain:{" "}
+                <code className="bg-gray-100 px-2 py-1 rounded">{domain}</code>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -92,14 +102,18 @@ export default function DoctorDomainPage() {
 
   if (!doctor) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            No Doctor Found
-          </h1>
-          <p className="text-gray-600">
-            This domain is not associated with any doctor.
-          </p>
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 mt-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                No Doctor Found
+              </h1>
+              <p className="text-gray-600">
+                This domain is not associated with any doctor.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -107,6 +121,7 @@ export default function DoctorDomainPage() {
 
   // Extract doctor data with fallbacks
   const {
+    _id,
     name = "Doctor Name",
     image = "/doc1.png",
     specialization = "General Medicine",
@@ -150,7 +165,9 @@ export default function DoctorDomainPage() {
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-500">Custom Domain</p>
-              <p className="text-sm font-medium text-gray-900">{doctorDomain}</p>
+              <p className="text-sm font-medium text-gray-900">
+                {doctorDomain}
+              </p>
             </div>
           </div>
         </div>
@@ -443,26 +460,38 @@ export default function DoctorDomainPage() {
               </div>
             )}
 
-            {/* Book Appointment Button */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="text-center">
+            {/* Time Slots Section */}
+            {slots && Object.keys(slots).length > 0 && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  Book an Appointment
+                  Available Time Slots
                 </h3>
-                <p className="text-gray-600 mb-6">
-                  Ready to schedule your consultation with Dr. {name}?
-                </p>
-                <Link
-                  href={`/doctors/${slug}`}
-                  className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors"
-                >
-                  Book Appointment
-                </Link>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(slots).map(([day, timeSlots]) => (
+                    <div key={day} className="bg-gray-50 p-4 rounded-xl">
+                      <h4 className="font-semibold mb-2">{day}</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {Array.isArray(timeSlots) &&
+                          timeSlots.map((slot, index) => (
+                            <span
+                              key={index}
+                              className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                            >
+                              {slot}
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Booking ChatBot */}
+      <BookingChatBot doctorId={_id} />
     </div>
   );
 }

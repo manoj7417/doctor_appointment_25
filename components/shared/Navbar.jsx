@@ -75,13 +75,7 @@ const Navbar = () => {
         {/* NAVIGATION (desktop) */}
         <nav className="hidden md:flex items-center gap-5">
           <NavItem href="/" icon={<HomeIcon size={16} />} label="Home" />
-          <button
-            onClick={() => handleProtectedRoute("/find-doctor")}
-            className="flex items-center gap-1.5 text-sm hover:text-primary transition-colors cursor-pointer"
-          >
-            <Users size={16} />
-            <span>More Doctors</span>
-          </button>
+
           <button
             onClick={() => handleProtectedRoute("/medicine")}
             className="flex items-center gap-1.5 text-sm hover:text-primary transition-colors cursor-pointer"
@@ -111,10 +105,7 @@ const Navbar = () => {
         <div className="md:hidden px-5 pb-4 mt-2 border-t border-border bg-background animate-fade-in-down">
           <div className="flex flex-col gap-4">
             <MobileNavItem href="/" label="Home" />
-            <MobileButtonItem
-              label="Find Doctors"
-              onClick={() => handleProtectedRoute("/find-doctor")}
-            />
+
             <MobileButtonItem
               label="Medicine"
               onClick={() => handleProtectedRoute("/medicine")}
